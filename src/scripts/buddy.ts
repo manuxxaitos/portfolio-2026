@@ -220,6 +220,7 @@ export function buddy() {
   };
 
   // en la página
+  let poppedAt = -1e9;
   const pointPage = (t: HTMLElement | null, cause: Cause) => {
     if (t === target) return;
     target = t;
@@ -227,8 +228,15 @@ export function buddy() {
     if (t) {
       clear('grace');
       const talking = shown && mode === 'point';
-      // suena solo si empieza a hablar de lo que apuntás (estaba cerrada o hablando sola) y moviste el puntero
-      timers.dwell = window.setTimeout(() => t === target && speak(t, 'point', !talking && cause === 'pointer'), talking ? 60 : DWELL);
+      // suena cuando empieza a hablar de lo que apuntás, y también al pasar a otra cosa (rebota), si moviste el
+      // puntero; como mucho un pop cada 0,35 s, para que recorrer una fila no sea una ametralladora
+      timers.dwell = window.setTimeout(() => {
+        if (t !== target) return;
+        const now = performance.now();
+        const pop = cause === 'pointer' && now - poppedAt > 350;
+        if (pop) poppedAt = now;
+        speak(t, 'point', pop);
+      }, talking ? 60 : DWELL);
     } else if (shown && mode === 'point') {
       clear('grace');
       timers.grace = window.setTimeout(hide, GRACE);

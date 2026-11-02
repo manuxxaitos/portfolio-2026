@@ -2,8 +2,8 @@
  * Diseño sonoro de la página: los efectos, sus volúmenes y qué los dispara, todo acá.
  *
  * Cuatro familias, cada una con un porqué fijo, de la más suave a la más clara:
- *  1. burbuja   La burbuja aparece porque moviste el puntero hacia algo: un pop de gel bajito. Solo al
- *               aparecer; cambiar de frase, hablar sola o llegar con una ventana no suena.
+ *  1. burbuja   La burbuja aparece, o pasa a otra cosa de la página, porque moviste el puntero hacia algo: un pop
+ *               de gel bajito (como mucho uno cada 0,35 s). Encadenar frases, hablar sola o llegar con una ventana no suena.
  *  2. cambio    Cambiaste un valor: el color de una marca 3D, qué tarjeta va adelante. Una gota. Si no
  *               cambió nada, no suena. El slider de día y noche, en cambio, hace clic en cada muesca que
  *               cruzás, como una rueda de selección: un tic seco y cortito que no corta ni espera a nadie.
@@ -153,7 +153,7 @@ export const SOUNDS = {
   /** la burbuja aparece porque apuntaste algo: el pop de gel, chiquito y bajo */
   pop: {
     family: 'burbuja',
-    vol: 0.06,
+    vol: 0.085,
     ms: 140,
     play: (v) => {
       tone(v, { f: 380, to: 760, glide: 0.05, peak: 0.5, attack: 0.008, tau: 0.024 });
@@ -313,6 +313,7 @@ let ctx: AudioContext | null = null;
 let master: GainNode;
 let wetBus: GainNode;
 let enabled = false;
+let gestured = false;
 let current: { out: GainNode; until: number } | null = null;
 
 // reverb corto y oscuro, solo para lo que es de vidrio
@@ -346,8 +347,22 @@ function ensure() {
 }
 
 /** suena si corresponde; devuelve si sonó */
-export function play(name: SoundName) {
-  if (!enabled || !ctx || ctx.state !== 'running' || document.hidden) return false;
+// si el audio todavía está despertando (pasa justo en el primer clic), el sonido espera y sale apenas arranca
+let waiting: { name: SoundName; at: number } | null = null;
+export function play(name: SoundName): boolean {
+  if (!enabled || document.hidden) return false;
+  if (!ctx || ctx.state !== 'running') {
+    // sin un gesto previo (clic, tecla, toque) el navegador no deja sonar nada
+    if (!(navigator as Navigator & { userActivation?: { hasBeenActive: boolean } }).userActivation?.hasBeenActive && !gestured) return false;
+    const c = ensure();
+    waiting = { name, at: performance.now() };
+    c.resume().then(() => {
+      const w = waiting;
+      waiting = null;
+      if (w && performance.now() - w.at < 450) play(w.name);
+    });
+    return false;
+  }
   const fx: Fx = SOUNDS[name];
   // el tic de una muesca es tan corto que va por su cuenta: no corta ni lo cortan
   if (name === 'tick') {
@@ -402,12 +417,15 @@ export function sound() {
 
   // el navegador deja arrancar el audio recién con un gesto (clic o tecla)
   const unlock = () => {
+    gestured = true;
     if (!enabled) return;
     const c = ensure();
     if (c.state !== 'running' && !document.hidden) c.resume();
   };
   addEventListener('pointerdown', unlock, { capture: true, passive: true });
   addEventListener('keydown', unlock, { capture: true });
+  addEventListener('touchend', unlock, { capture: true, passive: true });
+  addEventListener('click', unlock, { capture: true });
 
   btn?.addEventListener('click', async () => {
     enabled = !enabled;
