@@ -1,0 +1,83 @@
+---
+/**
+ * Una pieza: loop o imagen.
+ * fit="natural": la caja toma la proporción de la pieza (casos).
+ * fit="cover": llena la caja del padre (tarjetas horizontales).
+ * fit="contain": la pieza flota centrada sobre la tarjeta (verticales).
+ */
+import { Picture } from 'astro:assets';
+import Loop from './Loop.astro';
+import CoverStack from './CoverStack.astro';
+import Toy3D from './Toy3D.astro';
+import TiltCards from './TiltCards.astro';
+import type { Media } from '../data/types';
+
+interface Props {
+  item: Media;
+  fit?: 'natural' | 'cover' | 'contain';
+  sizes?: string;
+  eager?: boolean;
+  vt?: string;
+  /** en la fila de tapas: elegir con el cursor */
+  interactive?: boolean;
+}
+const { item, fit = 'natural', sizes = '100vw', eager = false, vt, interactive = false } = Astro.props;
+const ratio = item.kind === 'image' ? `${item.img.width} / ${item.img.height}` : item.ratio;
+const [rw, rh] = ratio.split('/').map(Number);
+const style = `--ar:${(rw / rh).toFixed(4)};aspect-ratio:${ratio};${vt ? `view-transition-name:${vt};` : ''}`;
+---
+
+<div class:list={['media', `media--${fit}`]} style={style}>
+  {item.kind === 'stack' && <CoverStack covers={item.covers} still={item.still} label={item.label} interactive={interactive} />}
+  {item.kind === 'toy' && <Toy3D module={item.module} poster={item.poster} label={item.label} ways={item.ways} say={item.say} />}
+  {item.kind === 'tilt' && <TiltCards cards={item.cards} bg={item.bg} width={item.width} label={item.label} />}
+  {item.kind === 'loop' && <Loop src={item.src} poster={item.poster} label={item.label} ratio={item.ratio} eager={eager} />}
+  {
+    item.kind === 'image' && (
+      <Picture
+        src={item.img}
+        alt={item.alt}
+        formats={['avif', 'webp']}
+        widths={[480, 800, 1200, 1680, 2200].filter((w) => w <= item.img.width)}
+        sizes={sizes}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : 'auto'}
+      />
+    )
+  }
+</div>
+
+<style>
+  .media {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .media :global(picture),
+  .media :global(img),
+  .media :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .media--natural {
+    width: 100%;
+    border-radius: var(--radius);
+  }
+  .media--cover {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto !important;
+  }
+  .media--contain {
+    height: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    border-radius: 10px;
+    box-shadow:
+      0 1px 2px rgb(18 19 20 / 0.08),
+      0 18px 40px -16px rgb(18 19 20 / 0.35);
+  }
+</style>

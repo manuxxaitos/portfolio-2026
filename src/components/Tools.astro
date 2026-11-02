@@ -1,0 +1,56 @@
+---
+import SectionHead from './SectionHead.astro';
+
+const tools: [string, string, string?][] = [
+  ['Diseño', 'Figma, sistemas de diseño, identidad, editorial'],
+  ['Producto y web', 'HTML, CSS, JavaScript y TypeScript, Three.js, GSAP, Astro, React, FastAPI, SQLite'],
+  ['IA y automatización', 'Claude Code, Codex, API de Anthropic, Whisper, Python, ffmpeg, OpenCV, Playwright', 'Uso la IA por iniciativa propia: para explorar más ideas, prototipar rápido y automatizar lo repetitivo, sin resignar el detalle.'],
+  ['Motion', 'After Effects, Premiere y video generado en código'],
+];
+---
+
+<section class="col sec" aria-labelledby="herramientas-t">
+  <SectionHead n={3} id="herramientas-t" title="Con qué trabajo" />
+  <dl class="tools" data-reveal>
+    {
+      tools.map(([k, v, note]) => (
+        <div>
+          <dt>{k}</dt>
+          <dd>
+            {note && <span class="note">{note}</span>}
+            {v}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .tools {
+    margin-top: 18px;
+  }
+  .tools div {
+    display: grid;
+    grid-template-columns: 17ch minmax(0, 1fr);
+    gap: 4px 20px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+  }
+  dt {
+    font-weight: 560;
+  }
+  dd {
+    color: var(--ink-3);
+  }
+  .note {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--ink-2);
+  }
+  @media (max-width: 560px) {
+    .tools div {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

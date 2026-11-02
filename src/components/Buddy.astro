@@ -1,0 +1,158 @@
+---
+/**
+ * Burbuja compañera del cursor: una píldora de gel verde menta que sigue al
+ * puntero con un poco de retraso y dice frases cortas según lo que tenga
+ * debajo (data-say), lo que se ve (data-ambient) o la ventana abierta
+ * (data-says). Es decorativa: no intercepta clics ni la leen los lectores
+ * de pantalla. Lógica en scripts/buddy.ts.
+ */
+---
+
+<div class="buddy" data-buddy aria-hidden="true">
+  <div class="buddy__pill"><span class="buddy__text"></span></div>
+  <span class="buddy__ruler"></span>
+</div>
+
+<style>
+  .buddy {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 95;
+    pointer-events: none;
+    transform-origin: 0 100%;
+    will-change: transform;
+  }
+  .buddy__pill,
+  .buddy__ruler {
+    font-family: var(--f-sans);
+    font-size: 0.78125rem;
+    font-weight: 600;
+    letter-spacing: -0.003em;
+    white-space: nowrap;
+  }
+  .buddy__ruler {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+  }
+
+  /* gel translúcido: degradé menta con el corte de Aqua, brillo arriba,
+     resplandor abajo, borde fino y sombra difusa */
+  .buddy__pill {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 28px;
+    padding: 0 12px;
+    overflow: hidden;
+    border-radius: 999px;
+    border-bottom-left-radius: 9px;
+    color: #0b4a34;
+    text-shadow: 0 1px 0 rgb(255 255 255 / 0.6);
+    background: linear-gradient(
+      180deg,
+      rgb(220 253 237 / 0.92) 0%,
+      rgb(172 241 209 / 0.86) 49%,
+      rgb(138 231 190 / 0.88) 51%,
+      rgb(178 245 214 / 0.92) 100%
+    );
+    -webkit-backdrop-filter: blur(10px) saturate(1.6);
+    backdrop-filter: blur(10px) saturate(1.6);
+    box-shadow:
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.85),
+      inset 0 -3px 6px rgb(228 255 243 / 0.6),
+      0 0 0 0.5px rgb(16 110 74 / 0.32),
+      0 2px 4px -2px rgb(16 110 74 / 0.35),
+      0 12px 26px -10px rgb(16 120 80 / 0.42);
+    opacity: 0;
+    transform: scale(0.5);
+    transform-origin: 0 100%;
+    transition:
+      opacity 0.18s ease-in,
+      transform 0.22s ease-in;
+  }
+  .buddy__pill::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 9px;
+    right: 9px;
+    top: 1px;
+    height: 46%;
+    border-radius: 999px;
+    background: linear-gradient(rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.1));
+  }
+  .buddy__text {
+    transition: opacity 0.12s;
+  }
+  .buddy__pill:global(.is-on) {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.2s ease-out,
+      transform 0.5s var(--spring),
+      width 0.42s cubic-bezier(0.3, 1.25, 0.5, 1);
+  }
+  /* un rebote chiquito con cada clic */
+  .buddy__pill:global(.is-on.is-press) {
+    transform: scale(0.86);
+    transition-duration: 0.2s, 0.12s, 0.42s;
+  }
+
+  /* pasa de hablar sola a hablar de lo que apuntás: un rebote chiquito (es cuando suena) */
+  .buddy__pill:global(.is-on.is-repop) {
+    animation: repop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes repop {
+    0% {
+      transform: scale(0.86);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /* la punta (la esquina menos redonda) mira siempre al puntero: abajo a la izquierda, salvo cerca de los bordes */
+  .buddy:global(.is-left) {
+    transform-origin: 100% 100%;
+  }
+  .buddy:global(.is-left) .buddy__pill {
+    border-bottom-left-radius: 999px;
+    border-bottom-right-radius: 9px;
+    transform-origin: 100% 100%;
+  }
+  .buddy:global(.is-down) {
+    transform-origin: 0 0;
+  }
+  .buddy:global(.is-down) .buddy__pill {
+    border-bottom-left-radius: 999px;
+    border-top-left-radius: 9px;
+    transform-origin: 0 0;
+  }
+  .buddy:global(.is-left.is-down) {
+    transform-origin: 100% 0;
+  }
+  .buddy:global(.is-left.is-down) .buddy__pill {
+    border-top-left-radius: 999px;
+    border-bottom-right-radius: 999px;
+    border-top-right-radius: 9px;
+    transform-origin: 100% 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .buddy__pill:global(.is-on.is-repop) {
+      animation: none;
+    }
+    .buddy__pill,
+    .buddy__pill:global(.is-on),
+    .buddy__pill:global(.is-on.is-press) {
+      transform: none;
+      transition: opacity 0.2s;
+    }
+  }
+</style>

@@ -1,0 +1,531 @@
+---
+/**
+ * Kora, impresa como estampilla: la escena 3D en vivo, dibujada en ASCII
+ * (exploraciones/kora-ascii; se trae con tools/kora/sync.mjs), con su
+ * leyenda y el slider de la hora del día de kshv.me debajo. La escena se
+ * carga después de la primera pintura y solo si hay WebGL; mientras tanto
+ * (y si no hay) se ve el póster. La burbuja del cursor explica qué es.
+ */
+import { Picture } from 'astro:assets';
+import poster from '../assets/kora/poster.jpg';
+
+// el sol del pulgar: un disco y doce rayos, largos y cortos alternados
+const rays = Array.from({ length: 12 }, (_, i) => i * 30)
+  .map((a) => `<rect x="10.4" y="${a % 60 === 0 ? 8.4 : 9.4}" width="1.2" height="${a % 60 === 0 ? 3 : 2}" rx="0.6" transform="rotate(${a} 11 16)"></rect>`)
+  .join('');
+// lo que cuenta la burbuja al pasar; «!» marca la pista importante (suena un destello si se mantiene el hover)
+const says = [
+  'Ella es Kora',
+  'Un proyecto exploratorio personal',
+  '3D en vivo, impreso en ASCII',
+  'Mové el cursor: te sigue con la mirada',
+  'Tocala: mueve la cola',
+];
+---
+
+<!-- «Cargando»: tapa la página un instante hasta que Kora está lista (máximo 4 s). Solo con JS -->
+<div class="boot" data-boot aria-hidden="true">
+  <span class="boot__bar"><i></i></span>
+  <span class="boot__txt">Cargando</span>
+</div>
+
+<section
+  class="kora"
+  data-kora
+  aria-label="Kora, un proyecto exploratorio personal"
+  data-ambient={JSON.stringify(['Kora es un proyecto exploratorio personal', 'Probá el slider: del día a la noche'])}
+>
+  <div class="kora__holder">
+    <div class="kora__stamp" data-kora-stamp>
+      <svg class="kora__grain" aria-hidden="true">
+        <defs>
+          <filter id="kora-fibras" x="0" y="0" width="100%" height="100%">
+            <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" stitchTiles="stitch"></feTurbulence>
+            <feColorMatrix values="0 0 0 0 .32  0 0 0 0 .24  0 0 0 0 .1  .22 0 0 0 -.05"></feColorMatrix>
+          </filter>
+          <pattern id="kora-papel" width="220" height="220" patternUnits="userSpaceOnUse">
+            <rect width="220" height="220" fill="#fff" filter="url(#kora-fibras)"></rect>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#kora-papel)"></rect>
+      </svg>
+      <div
+        class="kora__window"
+        role="img"
+        aria-label="Kora, una border collie colorada y blanca con un ojo ámbar y otro celeste, sentada en el camino de un santuario frente al monte Fuji, dibujada con caracteres ASCII"
+        data-say={says.join(' | ')}
+      >
+        <Picture
+          class="kora__poster"
+          src={poster}
+          alt=""
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1280]}
+          sizes="(min-width: 840px) 724px, 92vw"
+          quality={34}
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <canvas data-kora-canvas aria-hidden="true"></canvas>
+        <span class="kora__value" aria-hidden="true">84<small>円</small></span>
+        <span class="kora__country" aria-hidden="true">日本</span>
+      </div>
+      <div class="kora__legend" aria-hidden="true">
+        <div class="kora__title"><span>kora</span><span class="jp">コラ</span></div>
+        <div class="kora__meta">
+          <span>2026</span><span class="jp">コラ・オッドアイ</span><span class="kora__dots"><i></i><i></i></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <label class="sky" data-kora-sky data-say="Arrastrá: del día a la noche" style="--v:0.5;--field:rgb(238 96 71);--glyph:#fff3da;--moon:0">
+    <span class="sr-only">Hora del día en la escena de Kora</span>
+    <span aria-hidden="true" class="sky__end">昼</span>
+    <span class="sky__track">
+      <span aria-hidden="true" class="sky__rail"></span>
+      <input type="range" min="0" max="1" step="0.005" value="0.5" class="sky__input" />
+      <span aria-hidden="true" class="sky__thumb">
+        <span class="sky__paper"></span>
+        <span class="sky__arch"
+          ><svg viewBox="0 0 22 30"
+            ><g style="opacity:calc(1 - var(--moon))" fill="var(--glyph)"><circle cx="11" cy="16" r="3.2"></circle><Fragment set:html={rays} /></g><path
+              style="opacity:var(--moon)"
+              fill="var(--glyph)"
+              d="M13.6 10.6a5.8 5.8 0 1 0 0 10.8a4.6 4.6 0 0 1 0-10.8z"></path></svg
+          ></span
+        >
+      </span>
+    </span>
+    <span aria-hidden="true" class="sky__end">夜</span>
+  </label>
+  <p class="kora__cap">Kora, un proyecto exploratorio personal: una escena 3D en vivo, impresa en ASCII. Te sigue con la mirada.</p>
+</section>
+
+<script>
+  import { emit } from '../scripts/events';
+
+  // la escena (three.js y Kora) llega después de la primera pintura, cuando el navegador está libre
+  const root = document.querySelector<HTMLElement>('[data-kora]');
+
+  // «Cargando» se va cuando Kora ya dibuja (o no puede), y nunca dura más de 4 s ni menos de medio
+  const boot = document.querySelector<HTMLElement>('[data-boot]');
+  if (boot) {
+    const t0 = performance.now();
+    let gone = false;
+    const done = () => {
+      if (gone) return;
+      gone = true;
+      window.setTimeout(() => {
+        boot.classList.add('is-gone');
+        window.setTimeout(() => boot.remove(), 500);
+      }, Math.max(0, 500 - (performance.now() - t0)));
+    };
+    const ready = () => !root || root.classList.contains('is-live') || root.classList.contains('no-live');
+    if (ready()) done();
+    else {
+      new MutationObserver((_, mo) => ready() && (mo.disconnect(), done())).observe(root!, { attributes: true, attributeFilter: ['class'] });
+      window.setTimeout(done, 4000);
+    }
+  }
+
+  if (root) {
+    // tocarla es la interacción explícita: se entusiasma y mueve la cola (y suena un rebote, de vez en cuando)
+    root.querySelector('.kora__window')?.addEventListener('click', () => emit('kora:poke'));
+    // el slider hace clic en cada muesca que cruza (una cada 6 px del riel), como una rueda de selección
+    const sky = root.querySelector<HTMLInputElement>('.sky__input');
+    if (sky) {
+      const notch = () => Math.round((Number(sky.value) * sky.clientWidth) / 6);
+      let at = notch(),
+        last = 0;
+      sky.addEventListener('input', () => {
+        const n = notch();
+        if (n === at) return;
+        at = n;
+        // arrastrando muy rápido, como mucho un tic cada 24 ms
+        const now = performance.now();
+        if (now - last < 24) return;
+        last = now;
+        emit('sky:tick');
+      });
+    }
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start = () =>
+      import('../kora/mount.js')
+        .then(({ mountKora }) => mountKora(root, { reduced }))
+        .catch(() => root.classList.add('no-live'));
+    const idle = (cb: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(cb, { timeout: 1500 }) : setTimeout(cb, 300));
+    new IntersectionObserver(
+      ([e], io) => {
+        if (!e.isIntersecting) return;
+        io.disconnect();
+        // con «Cargando» en pantalla no hay nada más que pintar: arranca ya
+        (boot ? (cb: () => void) => cb() : idle)(start);
+      },
+      { rootMargin: '400px 0px' },
+    ).observe(root);
+  }
+</script>
+
+<style>
+  /* «Cargando»: el fondo de la página y una barra Aqua de rayas que corren */
+  .boot {
+    display: none;
+  }
+  :global(html.js) .boot {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    background: var(--paper);
+    transition: opacity 0.45s var(--ease-out);
+  }
+  .boot:global(.is-gone) {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .boot__bar {
+    position: relative;
+    width: 168px;
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: linear-gradient(#dfe1e4, #f7f8f9);
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.14),
+      inset 0 1px 2px rgb(0 0 0 / 0.12);
+  }
+  .boot__bar i {
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: repeating-linear-gradient(-45deg, #3b93f6 0 7px, #84c5ff 7px 14px);
+    background-size: 19.8px 19.8px;
+    box-shadow: inset 0 0 0 1px rgb(10 60 150 / 0.35);
+    animation: boot-stripes 0.7s linear infinite;
+  }
+  /* el brillo de gel encima de las rayas */
+  .boot__bar i::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(rgb(255 255 255 / 0.7), rgb(255 255 255 / 0.15) 50%, rgb(255 255 255 / 0) 51%, rgb(255 255 255 / 0.25));
+  }
+  .boot__txt {
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  @keyframes boot-stripes {
+    to {
+      background-position: 19.8px 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .boot__bar i {
+      animation: none;
+    }
+  }
+
+  @font-face {
+    font-family: 'Geist';
+    font-weight: 100 900;
+    font-display: swap;
+    src: url('/fonts/kora/geist-latin.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Archivo';
+    font-weight: 100 900;
+    font-stretch: 62% 125%;
+    font-display: swap;
+    src: url('/fonts/kora/archivo-wide-latin.woff2') format('woff2');
+  }
+
+  .kora {
+    /* el ancho de la columna, como el texto y las tarjetas; en el teléfono, el ancho disponible */
+    --sw: min(var(--col), 100vw - var(--pad) * 2);
+    /* blanco cálido: más blanco que el crema de la exploración, distinto del papel de la página */
+    --stamp-paper: #fdfaf3;
+    --stamp-ink: #141414;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: clamp(28px, 5vh, 52px);
+  }
+  .jp {
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', sans-serif;
+    font-style: normal;
+  }
+
+  /* la estampilla: papel con perforaciones, la imagen viva en su ventana y la leyenda impresa abajo */
+  .kora__holder {
+    width: var(--sw);
+    filter: drop-shadow(rgb(30 20 0 / 0.2) 0 1px 1px) drop-shadow(rgb(30 20 0 / 0.14) 0 3px 8px);
+  }
+  /* perforaciones con máscaras de degradé: el papel entero, menos medio agujero centrado en el borde cada
+     --p px; «round» hace que entre un número exacto por lado (como imagen, contaría como la principal de la página) */
+  .kora__stamp {
+    --p: clamp(13px, calc(var(--sw) / 46), 19px);
+    --r: calc(var(--p) * 0.32);
+    position: relative;
+    isolation: isolate;
+    padding: calc(var(--sw) * 0.024) calc(var(--sw) * 0.024) 0;
+    background: var(--stamp-paper);
+    color: var(--stamp-ink);
+    -webkit-mask-image: linear-gradient(#000 0 0), radial-gradient(circle at center, transparent var(--r), #000 calc(var(--r) + 0.5px));
+    mask-image: linear-gradient(#000 0 0), radial-gradient(circle at center, transparent var(--r), #000 calc(var(--r) + 0.5px));
+    -webkit-mask-size:
+      calc(100% - var(--p)) calc(100% - var(--p)),
+      var(--p) var(--p);
+    mask-size:
+      calc(100% - var(--p)) calc(100% - var(--p)),
+      var(--p) var(--p);
+    -webkit-mask-position:
+      center,
+      calc(var(--p) / -2) calc(var(--p) / -2);
+    mask-position:
+      center,
+      calc(var(--p) / -2) calc(var(--p) / -2);
+    -webkit-mask-repeat: no-repeat, round;
+    mask-repeat: no-repeat, round;
+  }
+  /* fibras del papel (un SVG en línea: como fondo CSS contaría como la imagen principal de la página) */
+  .kora__grain {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .kora__window {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 2px;
+    background: #0a3a86;
+    cursor: crosshair;
+  }
+  .kora__window :global(.kora__poster),
+  .kora__window :global(.kora__poster img),
+  .kora__window canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .kora__window canvas {
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-out);
+  }
+  .kora:global(.is-live) canvas {
+    opacity: 1;
+  }
+  .kora__value {
+    position: absolute;
+    left: 3.2%;
+    top: 3.6%;
+    color: #fff;
+    font: 300 calc(var(--sw) * 0.046) / 1 Geist, var(--f-sans);
+    letter-spacing: -0.02em;
+    pointer-events: none;
+  }
+  .kora__value small {
+    margin-left: 0.12em;
+    font: 300 0.42em/1 'Hiragino Sans', sans-serif;
+    letter-spacing: 0;
+  }
+  .kora__country {
+    position: absolute;
+    right: 3.2%;
+    top: 4.2%;
+    color: #fff;
+    font: 300 calc(var(--sw) * 0.036) / 1 'Hiragino Sans', sans-serif;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+  }
+  .kora__legend {
+    padding: calc(var(--sw) * 0.016) 2px calc(var(--sw) * 0.022);
+  }
+  /* el nombre en la tipografía de la página, en minúsculas */
+  .kora__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.22em;
+    font: 650 calc(var(--sw) * 0.068) / 0.92 var(--f-sans);
+    letter-spacing: -0.045em;
+  }
+  .kora__title .jp {
+    font-weight: 300;
+    font-size: 0.74em;
+    letter-spacing: 0.02em;
+  }
+  .kora__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    margin-top: calc(var(--sw) * 0.012);
+    font: 900 calc(var(--sw) * 0.024) / 1 Archivo, var(--f-sans);
+    font-stretch: 125%;
+  }
+  .kora__meta .jp {
+    font-weight: 600;
+    font-size: 0.92em;
+    letter-spacing: 0.02em;
+  }
+  .kora__dots {
+    display: inline-flex;
+    margin-left: 0.15em;
+  }
+  .kora__dots i {
+    display: block;
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: 50%;
+    background: #d98a24;
+  }
+  .kora__dots i + i {
+    margin-left: -0.18em;
+    background: #9fd8f6;
+  }
+
+  /* el slider de la hora, como el de kshv.me: riel de rayitas y un pulgar que es una estampilla con sol o luna */
+  .sky {
+    --sky-night: #141c5c;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+    margin: 16px auto 0;
+    cursor: grab;
+  }
+  .sky:active {
+    cursor: grabbing;
+  }
+  .sky__end {
+    flex-shrink: 0;
+    font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink-3);
+  }
+  .sky__track {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+  }
+  .sky__rail {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 12px;
+    translate: 0 -50%;
+    background: linear-gradient(to right, #6fb0dc, #ffc65a 36%, #f0663a 48%, #e8487a 58%, #4a2a96 76%, var(--sky-night));
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 1.5px, transparent 1.5px 6px);
+    mask-image: repeating-linear-gradient(90deg, #000 0 1.5px, transparent 1.5px 6px);
+  }
+  .sky__input {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: transparent;
+    outline: none;
+    cursor: inherit;
+  }
+  .sky__input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 34px;
+    height: 44px;
+  }
+  .sky__input::-moz-range-thumb {
+    width: 34px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+  }
+  .sky__thumb {
+    position: absolute;
+    top: 50%;
+    left: calc(var(--v) * (100% - 34px));
+    width: 34px;
+    height: 42px;
+    translate: 0 -50%;
+    pointer-events: none;
+    isolation: isolate;
+    filter: drop-shadow(rgb(30 20 0 / 0.2) 0 1px 1px) drop-shadow(rgb(30 20 0 / 0.14) 0 3px 8px);
+    transition: scale 0.15s ease-out;
+  }
+  .sky__input:active + .sky__thumb {
+    scale: 1.08;
+  }
+  .sky__input:focus-visible + .sky__thumb {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+  .sky__paper {
+    --r: 2.2px;
+    --p: 7.5px;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--stamp-paper);
+    -webkit-mask-image: linear-gradient(#000 0 0), radial-gradient(circle at center, transparent var(--r), #000 calc(var(--r) + 0.4px));
+    mask-image: linear-gradient(#000 0 0), radial-gradient(circle at center, transparent var(--r), #000 calc(var(--r) + 0.4px));
+    -webkit-mask-size:
+      calc(100% - 7px) calc(100% - 7px),
+      var(--p) var(--p);
+    mask-size:
+      calc(100% - 7px) calc(100% - 7px),
+      var(--p) var(--p);
+    -webkit-mask-position: 50% center;
+    mask-position: 50% center;
+    -webkit-mask-repeat: no-repeat, round;
+    mask-repeat: no-repeat, round;
+  }
+  .sky__arch {
+    position: absolute;
+    inset: 5px;
+    border-radius: 50% 50% 3px 3px / 42% 42% 3px 3px;
+    background: var(--field);
+  }
+  .sky__arch svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* con mouse lo explica la burbuja; en táctil, esta línea */
+  .kora__cap {
+    max-width: 44ch;
+    margin-top: 10px;
+    font-size: 0.8125rem;
+    text-align: center;
+    color: var(--ink-3);
+    text-wrap: balance;
+  }
+  :global(.has-buddy) .kora__cap {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sky__thumb,
+    .kora__window canvas {
+      transition: none;
+    }
+  }
+</style>

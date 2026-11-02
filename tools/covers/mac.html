@@ -1,0 +1,48 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;src:url('../../public/fonts/inter-var.woff2')}
+*{box-sizing:border-box;margin:0}html,body{width:1600px;height:1000px;overflow:hidden;font-family:Inter;-webkit-font-smoothing:antialiased}
+.c{position:relative;width:1600px;height:1000px;overflow:hidden}
+/* monitor */
+.mon{position:absolute;left:50%;top:76px;width:1160px;transform:translateX(-50%)}
+.mon.shift{left:44%}
+.bezel{position:relative;padding:13px;border-radius:22px;background:#0d0d0e;box-shadow:inset 0 0 0 1.5px #3a3a3d,0 2px 3px rgba(0,0,0,.15),0 50px 90px -40px rgba(0,0,0,.55)}
+.screen{position:relative;width:1134px;height:709px;border-radius:9px;overflow:hidden;background:var(--wall)}
+.menubar{position:absolute;left:0;right:0;top:0;height:25px;display:flex;align-items:center;gap:18px;padding:0 14px;background:rgba(255,255,255,.55);backdrop-filter:blur(20px);font-size:12.5px;color:#111;z-index:2}
+.menubar.dark{background:rgba(20,20,24,.55);color:#f2f2f2}
+.menubar b{font-weight:650}.menubar .r{margin-left:auto;display:flex;gap:14px;align-items:center}
+.menubar svg{width:13px;height:13px;fill:currentColor}
+.win{position:absolute;left:34px;right:34px;top:41px;bottom:0;border-radius:11px 11px 0 0;overflow:hidden;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.25),0 22px 50px -18px rgba(0,0,0,.45)}
+.win.dark{background:#1b1b1f;box-shadow:0 0 0 .5px rgba(255,255,255,.12),0 22px 50px -18px rgba(0,0,0,.7)}
+.tb{height:30px;display:flex;align-items:center;gap:7px;padding:0 12px;background:#efefee;border-bottom:1px solid #dadad6;position:relative}
+.win.dark .tb{background:#28282c;border-color:#36363b}
+.tb i{width:11px;height:11px;border-radius:50%}.tb i:nth-child(1){background:#ff5f57}.tb i:nth-child(2){background:#febc2e}.tb i:nth-child(3){background:#28c840}
+.tb span{position:absolute;left:50%;transform:translateX(-50%);font-size:12px;color:#77797c;background:#fff;border:1px solid #deded9;border-radius:6px;padding:2px 60px}
+.win.dark .tb span{background:#323237;border-color:#3d3d43;color:#a2a2aa}
+.tb.app span{background:none;border:0;font-weight:600;color:#4b4e52;padding:0}
+.win img.shot{display:block;width:100%}
+.neck{width:180px;height:92px;margin:0 auto;background:linear-gradient(90deg,#b9bbbe,#e6e7e8 40%,#d2d4d6 70%,#a9abaf);clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
+.base{width:330px;height:16px;margin:0 auto;border-radius:3px 3px 8px 8px;background:linear-gradient(#e9eaeb,#b8babd);box-shadow:0 18px 30px -12px rgba(0,0,0,.4)}
+.ph{position:absolute;border-radius:40px;padding:9px;background:#0d0d0e;box-shadow:inset 0 0 0 1.5px #3a3a3d,0 40px 70px -30px rgba(0,0,0,.55);z-index:3}
+.ph .in{overflow:hidden;border-radius:31px}
+.ph img{display:block;width:100%}
+</style></head><body><div class="c" id="c"></div>
+<script>
+const W2=new URL('src/',location.href).pathname;
+const apple='<svg viewBox="0 0 14 17"><path d="M11.6 9c0-2 1.6-2.9 1.7-3a3.7 3.7 0 0 0-2.9-1.6c-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7A3.9 3.9 0 0 0 1.5 6.4c-1.4 2.4-.4 6 1 8 .7 1 1.5 2 2.5 2s1.4-.6 2.6-.6 1.5.6 2.6.6 1.7-1 2.4-2a8 8 0 0 0 1-2.2A3.4 3.4 0 0 1 11.6 9ZM9.6 3.1A3.4 3.4 0 0 0 10.4.6 3.5 3.5 0 0 0 8.1 1.8 3.2 3.2 0 0 0 7.3 4.2a2.9 2.9 0 0 0 2.3-1.1Z"/></svg>';
+const bar=(app,menus,dark)=>`<div class="menubar ${dark?'dark':''}">${apple}<b>${app}</b>${menus.map(m=>`<span>${m}</span>`).join('')}<div class="r"><span>jue 30 oct</span><span>22:14</span></div></div>`;
+const mac=(o)=>`<div class="mon ${o.shift?'shift':''}"><div class="bezel"><div class="screen" style="--wall:${o.wall}">${bar(o.app,o.menus,o.darkbar)}<div class="win ${o.dark?'dark':''}"><div class="tb ${o.url?'':'app'}"><i></i><i></i><i></i><span>${o.url||o.app}</span></div><img class="shot" src="file://${o.src}"></div></div></div><div class="neck"></div><div class="base"></div></div>`;
+const phone=(src,x,y,w,h)=>`<div class="ph" style="left:${x}px;top:${y}px;width:${w}px"><div class="in" style="height:${h}px"><img src="file://${src}"></div></div>`;
+const L={
+ cirilog:{bg:'#e3e7ec',h:mac({app:'CiriLog',menus:['Archivo','Edición','Ver','Ventana','Ayuda'],wall:'linear-gradient(160deg,#c9d6e6,#e9eef4 55%,#d7dfe9)',src:W2+'cirilog-dashboard.png'})},
+ precionauta:{bg:'#221b38',h:mac({app:'Safari',menus:['Archivo','Edición','Visualización','Historial'],darkbar:true,dark:true,url:'precionauta.com.ar',wall:'linear-gradient(160deg,#3a2c63,#1a1530)',src:W2+'precionauta-home-desktop.png'})},
+ lym:{bg:'#e7e0d4',h:mac({app:'Safari',menus:['Archivo','Edición','Visualización','Historial'],url:'lym-studio.com',shift:true,wall:'linear-gradient(160deg,#d9cdbb,#efe9df)',src:W2+'lym-studio-desktop.png'})+phone(W2+'lym-studio-mobile.png',1170,330,270,560)},
+ medibra:{bg:'#dde9e3',h:mac({app:'Safari',menus:['Archivo','Edición','Visualización','Historial'],url:'manuxxaitos.github.io/saudebr',shift:true,wall:'linear-gradient(160deg,#c3dccf,#eef5f1)',src:W2+'medibra-saude-desktop.png'})+phone(W2+'medibra-saude-mobile.png',1170,330,270,560)},
+};
+const winOnly=(src,dark,title)=>`<div class="win ${dark?'dark':''}" style="left:110px;right:110px;top:90px;bottom:auto;border-radius:12px"><div class="tb app"><i></i><i></i><i></i><span>${title}</span></div><img class="shot" src="file://${src}"></div>`;
+L['cirilog-pipeline']={bg:'#e3e7ec',h:winOnly(W2+'cirilog-pipeline.png',false,'CiriLog')};
+L['cirilog-dark']={bg:'#1d2026',h:winOnly(W2+'cirilog-dashboard-dark.png',true,'CiriLog')};
+const safari=(src,url,top=90)=>`<div class="win" style="left:110px;right:110px;top:${top}px;bottom:auto;border-radius:12px"><div class="tb"><i></i><i></i><i></i><span>${url}</span></div><img class="shot" src="file://${src}"></div>`;
+L.trelles={bg:'#e9e4dc',h:safari(W2+'lym-trelles928-desktop.png','lym-studio.com/trelles',75)};
+L.canaveral={bg:'#dfe3da',h:safari(W2+'canaveral-desktop.jpg','lym-studio.com/preview-canaveral',75)};
+const k=location.hash.slice(1),d=L[k];document.body.style.background=d.bg;document.getElementById('c').innerHTML=d.h;
+</script></body></html>

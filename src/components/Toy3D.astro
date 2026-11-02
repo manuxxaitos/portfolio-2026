@@ -1,0 +1,177 @@
+---
+/**
+ * Una marca en 3D, viva dentro de su ventana (src/kench/toy.js, src/aish/logo3d.js): mira al cursor, se
+ * gira arrastrando, reacciona si la tocás y cambia de color con las pastillas de abajo. three.js se carga
+ * recién cuando la ventana se abre; hasta entonces (y sin WebGL) se ve el póster.
+ */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  module: 'kench' | 'aish' | 'supplycon';
+  poster: ImageMetadata;
+  label: string;
+  /** clave, nombre, color de la pieza y del fondo de la pastilla */
+  ways: { key: string; name: string; fg: string; bg: string }[];
+  say: string;
+}
+const { module, poster, label, ways, say } = Astro.props;
+---
+
+<div class="toy" data-toy data-module={module}>
+  <div class="toy__stage" role="img" aria-label={label} data-say={say}>
+    <Picture
+      class="toy__poster"
+      src={poster}
+      alt=""
+      formats={['avif', 'webp']}
+      widths={[800, 1200, 1600]}
+      sizes="(min-width: 1100px) 1100px, 92vw"
+      loading="lazy"
+      decoding="async"
+    />
+    <canvas data-toy-canvas aria-hidden="true"></canvas>
+  </div>
+  {ways.length > 1 && (<div class="toy__ways" role="group" aria-label="Color">
+    {
+      ways.map((w, i) => (
+        <button
+          type="button"
+          class="toy__way"
+          data-way={w.key}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+          aria-label={w.name}
+          data-say={w.name}
+          style={`--f:${w.fg};--b:${w.bg}`}
+        >
+          <i />
+        </button>
+      ))
+    }
+  </div>)}
+  <p class="toy__hint" aria-hidden="true">Arrastrá para girar · un toque y rebota</p>
+</div>
+
+<script>
+  import { emit } from '../scripts/events';
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const modules: Record<string, () => Promise<{ mount: (root: HTMLElement, opts: object) => void }>> = {
+    kench: () => import('../kench/toy.js'),
+    aish: () => import('../aish/logo3d.js'),
+    supplycon: () => import('../supplycon/iso3d.js'),
+  };
+  document.querySelectorAll<HTMLElement>('[data-toy]').forEach((root) => {
+    // arranca la primera vez que se ve (al abrir la ventana)
+    new IntersectionObserver(([e], io) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      modules[root.dataset.module!]()
+        .then(({ mount }) =>
+          mount(root, {
+            reduced,
+            onPoke: () => emit('toy:poke', root.dataset.module),
+            onColor: (way: string) => emit('toy:color', way),
+          }),
+        )
+        .catch(() => root.classList.add('no-live'));
+    }).observe(root);
+  });
+</script>
+
+<style>
+  .toy {
+    position: absolute;
+    inset: 0;
+  }
+  .toy__stage {
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .toy__stage:active {
+    cursor: grabbing;
+  }
+  .toy__stage :global(.toy__poster),
+  .toy__stage :global(.toy__poster img),
+  .toy__stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .toy__stage canvas {
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-out);
+  }
+  .toy:global(.is-live) canvas {
+    opacity: 1;
+  }
+
+  /* las cuatro combinaciones: una pastillita con la llama sobre su fondo */
+  .toy__ways {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    display: flex;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.55);
+    -webkit-backdrop-filter: blur(14px) saturate(1.5);
+    backdrop-filter: blur(14px) saturate(1.5);
+    box-shadow:
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.8),
+      0 0 0 0.5px rgb(18 19 20 / 0.12),
+      0 6px 16px -8px rgb(18 19 20 / 0.35);
+  }
+  .toy__way {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--b);
+    box-shadow:
+      inset 0 0 0 0.5px rgb(0 0 0 / 0.25),
+      0 1px 2px rgb(0 0 0 / 0.15);
+    transition: transform 0.35s var(--spring);
+  }
+  .toy__way i {
+    width: 11px;
+    height: 11px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: var(--f);
+  }
+  /* el cromo y el acero, como un botón de metal */
+  .toy__way[data-way='cromo'] i,
+  .toy__way[data-way='acero'] i {
+    background: linear-gradient(135deg, #ffffff, #9a9aa2 45%, #f4f4f6 60%, #7c7c84);
+  }
+  .toy__way:hover {
+    transform: scale(1.12);
+  }
+  .toy__way:active {
+    transform: scale(0.9);
+  }
+  .toy__way[aria-pressed='true'] {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 3.5px rgb(18 19 20 / 0.55);
+  }
+  .toy__hint {
+    position: absolute;
+    right: 16px;
+    bottom: 18px;
+    font-size: 0.75rem;
+    font-weight: 550;
+    color: rgb(18 19 20 / 0.55);
+    pointer-events: none;
+  }
+  :global(.has-buddy) .toy__hint {
+    display: none;
+  }
+</style>

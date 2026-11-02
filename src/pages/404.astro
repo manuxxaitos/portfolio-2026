@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title="Página no encontrada · Tomás Cardozo" description="Esta página no existe.">
+  <section class="nf">
+    <canvas data-plotter="field" aria-hidden="true"></canvas>
+    <div class="nf__in wrap">
+      <p class="label">Error 404</p>
+      <h1>Esta página no existe.</h1>
+      <a class="btn btn--dark" href={`${base}/`}>Volver al inicio <Arrow /></a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    position: relative;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .nf canvas {
+    -webkit-mask-image: radial-gradient(100% 80% at 50% 50%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(100% 80% at 50% 50%, #000 40%, transparent 100%);
+  }
+  .nf__in {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    text-align: center;
+  }
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    letter-spacing: -0.04em;
+  }
+</style>

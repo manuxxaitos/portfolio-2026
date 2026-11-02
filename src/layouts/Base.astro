@@ -1,0 +1,79 @@
+---
+import '../styles/global.css';
+import Buddy from '../components/Buddy.astro';
+import SoundToggle from '../components/SoundToggle.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = 'Tomás Cardozo — Diseñador',
+  description = 'Diseñador en Buenos Aires. Diseño marcas, sitios y productos, los programo y automatizo el resto.',
+  image = '/og.jpg',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#f5f5f3" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-display-600.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <a class="skip mono" href="#contenido">Saltar al contenido</a>
+    <main id="contenido">
+      <slot />
+    </main>
+    <Buddy />
+    <SoundToggle />
+    <script>
+      import { boot } from '../scripts/site';
+      boot();
+    </script>
+  </body>
+</html>
+
+<style>
+  .skip {
+    position: fixed;
+    left: var(--pad);
+    top: 8px;
+    z-index: 100;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--paper);
+    text-decoration: none;
+    transform: translateY(-150%);
+  }
+  .skip:focus {
+    transform: none;
+  }
+</style>

@@ -1,0 +1,52 @@
+---
+/**
+ * Video en loop, mudo y diferido: no descarga nada hasta acercarse a la
+ * pantalla y se pausa cuando sale (ver lazyVideos en scripts/site.ts).
+ */
+interface Props {
+  /** ruta base en /public sin extensión, p. ej. /media/aish/historia */
+  src: string;
+  poster: string;
+  label: string;
+  ratio?: string;
+  class?: string;
+  eager?: boolean;
+}
+const { src, poster, label, ratio = '16 / 9', class: cls = '', eager = false } = Astro.props;
+---
+
+<video
+  class:list={['loop', cls]}
+  data-loop
+  muted
+  loop
+  playsinline
+  disablepictureinpicture
+  preload="none"
+  poster={poster}
+  aria-label={label}
+  style={`aspect-ratio:${ratio}`}
+>
+  {
+    eager ? (
+      <>
+        <source src={`${src}.av1.mp4`} type='video/mp4; codecs="av01.0.05M.08"' />
+        <source src={`${src}.mp4`} type="video/mp4" />
+      </>
+    ) : (
+      <>
+        <source data-src={`${src}.av1.mp4`} type='video/mp4; codecs="av01.0.05M.08"' />
+        <source data-src={`${src}.mp4`} type="video/mp4" />
+      </>
+    )
+  }
+</video>
+
+<style>
+  .loop {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    background: var(--surface);
+  }
+</style>

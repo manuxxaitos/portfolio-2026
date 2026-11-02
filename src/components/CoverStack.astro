@@ -1,0 +1,146 @@
+---
+/**
+ * Anillo de tapas en 3D (src/tapas/ring.js): las tapas curvadas, como placas de vidrio, giran alrededor
+ * de la cámara; las del fondo nítidas y, hacia los costados, un lente de vidrio las estira, desenfoca y
+ * separa sus colores. Solo vive en la galería (interactive): se arrastra, se frena al pasar y, al tocar una
+ * tapa, la trae adelante; la burbuja dice el título de la tapa que apuntás. En la tarjeta de la página es una
+ * foto fija del anillo (still), para no sumar otro 3D a la página; la misma foto se ve en la galería hasta que
+ * llega three.js (o si no hay WebGL).
+ */
+import { Picture, getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  covers: { img: ImageMetadata; title: string; artist: string }[];
+  still: ImageMetadata;
+  label: string;
+  interactive?: boolean;
+}
+const { covers, still, label, interactive = false } = Astro.props;
+// las grandes (pares) van con más resolución que las chicas, que siempre se ven chicas
+const widthOf = (i: number) => (i % 2 === 0 ? (interactive ? 1024 : 560) : interactive ? 512 : 300);
+const srcs = await Promise.all(covers.map((c, i) => getImage({ src: c.img, width: widthOf(i), format: 'webp', quality: 90 })));
+const data = covers.map((c, i) => ({ src: srcs[i].src, title: c.title, artist: c.artist }));
+---
+
+<div class="ring" data-ring={interactive ? '' : undefined} data-interactive={interactive ? '' : undefined} data-covers={interactive ? JSON.stringify(data) : undefined}>
+  <div class="ring__stage" data-ring-stage role="img" aria-label={label}>
+    <Picture
+      class="ring__still"
+      src={still}
+      alt=""
+      formats={['avif', 'webp']}
+      widths={interactive ? [1100, 1600, 2200] : [400, 760, 1110]}
+      sizes={interactive ? '(min-width: 1100px) 1100px, 92vw' : '(min-width: 840px) 370px, 100vw'}
+      loading="lazy"
+      decoding="async"
+    />
+    {interactive && <canvas data-ring-canvas aria-hidden="true"></canvas>}
+    {interactive && <div class="ring__hits" data-ring-hits></div>}
+  </div>
+  {interactive && <p class="ring__cap" data-ring-cap aria-live="polite"></p>}
+</div>
+
+<script>
+  import { emit } from '../scripts/events';
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-ring]').forEach((root) => {
+    // arranca la primera vez que se ve
+    new IntersectionObserver(([e], io) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      import('../tapas/ring.js')
+        .then(({ mountRing }) =>
+          mountRing(root, {
+            covers: JSON.parse(root.dataset.covers!),
+            interactive: root.hasAttribute('data-interactive'),
+            reduced,
+            onPick: () => emit('tilt:front'),
+          }),
+        )
+        .catch(() => root.classList.add('no-live'));
+    }, { rootMargin: '200px' }).observe(root);
+  });
+</script>
+
+<style>
+  .ring {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    container-type: size;
+    background: radial-gradient(120% 90% at 50% 50%, #f4f6f7 0%, #ebeef0 70%, #e8ebed 100%);
+  }
+  .ring__stage {
+    position: absolute;
+    inset: 0;
+  }
+  .ring[data-interactive] .ring__stage {
+    cursor: grab;
+    touch-action: pan-y;
+  }
+  .ring:global(.is-dragging) .ring__stage {
+    cursor: grabbing;
+  }
+  .ring canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-out);
+  }
+  .ring:global(.is-live) canvas {
+    opacity: 1;
+  }
+
+  /* la foto fija: en la tarjeta es todo; en la galería, hasta que arranca el anillo */
+  .ring__stage :global(.ring__still),
+  .ring__stage :global(.ring__still img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .ring:global(.is-live) :global(.ring__still) {
+    opacity: 0;
+    transition: opacity 0.6s var(--ease-out) 0.2s;
+  }
+
+  /* cajas invisibles sobre cada tapa visible, para que la burbuja diga cuál es */
+  .ring__hits {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .ring__hits :global(.ring__hit) {
+    position: absolute;
+    pointer-events: auto;
+  }
+  /* las grandes tapan a las chicas que tienen atrás */
+  .ring__hits :global(.ring__hit.is-big) {
+    z-index: 1;
+  }
+  .ring:global(.is-dragging) .ring__hits :global(.ring__hit) {
+    pointer-events: none;
+  }
+
+  /* con mouse, el título lo dice la burbuja del cursor */
+  :global(.has-buddy) .ring__cap {
+    display: none;
+  }
+  .ring__cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+    pointer-events: none;
+  }
+</style>

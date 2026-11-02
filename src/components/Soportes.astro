@@ -1,0 +1,432 @@
+---
+/**
+ * Piezas de redes puestas en el soporte donde se usaron, sobre el color del equipo: historias en un teléfono,
+ * placas horizontales en una pantalla de transmisión, publicaciones como posteo, encabezados como perfil y un
+ * perfil con su grilla, derechas, sin inclinar. Poco texto: el nombre del equipo en una pastilla; cada pieza dice qué es en la burbuja.
+ */
+import { Image } from 'astro:assets';
+import type { Stage } from '../data/types';
+
+interface Props {
+  title: string;
+  stage: Stage;
+}
+const { title, stage } = Astro.props;
+const initial = stage.account.replace(/[^A-Za-z]/g, '').slice(0, 1);
+// ancho de cada soporte, en % del escenario (en cajas angostas se duplica)
+const sizes = { phone: '(min-width: 1100px) 230px, 40vw', screen: '(min-width: 1100px) 640px, 100vw', post: '(min-width: 1100px) 290px, 50vw', banner: '(min-width: 1100px) 660px, 100vw', grid: '(min-width: 1100px) 110px, 18vw' };
+---
+
+<div class="stage" style={`--bg:${stage.bg}`} role="group" aria-label={title}>
+  <span class="stage__chip">{title}</span>
+  {
+    stage.pieces.map((p) => (
+      <figure
+        class:list={['piece', `piece--${p.as}`]}
+        data-say={p.alt}
+        style={p.w ? `--w:${p.w}cqi` : undefined}
+      >
+        {p.as === 'phone' && (
+          <div class="phone">
+            <div class="phone__screen">
+              <Image src={p.img} alt={p.alt} widths={[360, 540]} sizes={sizes.phone} loading="lazy" />
+              <span class="phone__bars" aria-hidden="true"><i class="on" /><i /><i /></span>
+              <span class="phone__island" aria-hidden="true" />
+            </div>
+          </div>
+        )}
+        {p.as === 'app' && (
+          <div class="phone">
+            <div class="phone__screen phone__screen--app">
+              <Image src={p.img} alt={p.alt} widths={[400, 800]} sizes={sizes.phone} loading="lazy" />
+              <span class="phone__island" aria-hidden="true" />
+            </div>
+          </div>
+        )}
+        {p.as === 'browser' && (
+          <div class="browser">
+            <span class="browser__bar" aria-hidden="true"><i /><i /><i /></span>
+            <div class="browser__page">
+              <Image src={p.img} alt={p.alt} widths={[900, 1300]} sizes={sizes.screen} loading="lazy" />
+            </div>
+          </div>
+        )}
+        {p.as === 'screen' && (
+          <div class="screen">
+            <Image src={p.img} alt={p.alt} widths={[960, 1440, 1920]} sizes={sizes.screen} loading="lazy" />
+            <span class="screen__bar" aria-hidden="true">
+              <svg viewBox="0 0 10 12"><path d="M1 1l8 5-8 5z" /></svg>
+              <i><b /></i>
+            </span>
+          </div>
+        )}
+        {p.as === 'post' && (
+          <div class="post">
+            <span class="post__head" aria-hidden="true"><i>{initial}</i>{stage.account}</span>
+            <Image src={p.img} alt={p.alt} widths={[480, 720, 1080]} sizes={sizes.post} loading="lazy" />
+            <span class="post__icons" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" /></svg>
+              <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 20 12z" /></svg>
+              <svg viewBox="0 0 24 24"><path d="M21 4L3 11l7 2 2 7z" /></svg>
+            </span>
+          </div>
+        )}
+        {p.as === 'banner' && (
+          <div class="banner">
+            <Image src={p.img} alt={p.alt} widths={[750, 1125, 1500]} sizes={sizes.banner} loading="lazy" />
+            <span class="banner__who" aria-hidden="true">
+              <i>{initial}</i>
+              <b>{stage.account}</b>
+            </span>
+          </div>
+        )}
+        {p.as === 'grid' && (
+          <div class="phone">
+            <div class="phone__screen phone__screen--profile">
+              <span class="profile__head" aria-hidden="true"><i>{initial}</i><b>{stage.account}</b></span>
+              <span class="profile__grid">
+                {[p.img, ...(p.more ?? [])].map((m, k) => (
+                  <Image src={m} alt={k === 0 ? p.alt : ''} widths={[220]} sizes={sizes.grid} loading="lazy" />
+                ))}
+              </span>
+              <span class="phone__island" aria-hidden="true" />
+            </div>
+          </div>
+        )}
+      </figure>
+    ))
+  }
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    container-type: inline-size;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 4cqi 2.6cqi;
+    padding: 8cqi 4cqi 6cqi;
+    border-radius: 14px;
+    overflow: hidden;
+    background:
+      radial-gradient(90% 70% at 50% 0%, rgb(255 255 255 / 0.18), transparent 62%),
+      radial-gradient(60% 50% at 50% 110%, rgb(0 0 0 / 0.28), transparent 70%),
+      var(--bg);
+  }
+  .stage + :global(.stage) {
+    margin-top: 12px;
+  }
+  .stage__chip {
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    padding: 4px 11px 5px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 560;
+    color: #fff;
+    background: rgb(255 255 255 / 0.14);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.22);
+  }
+
+    /* derechas y quietas; cada soporte lleva una sombra corta (box-shadow, más liviana que un filtro) */
+  .piece {
+    width: var(--w);
+    margin: 0;
+  }
+  .piece :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .piece--phone {
+    --w: 19cqi;
+  }
+  .piece--grid {
+    --w: 22cqi;
+  }
+  .piece--screen {
+    --w: 56cqi;
+  }
+  .piece--post {
+    --w: 25cqi;
+  }
+  .piece--app {
+    --w: 17cqi;
+  }
+  .piece--browser {
+    --w: 50cqi;
+  }
+  .piece--banner {
+    --w: 58cqi;
+  }
+
+  /* teléfono: marco negro, isla y las barritas de la historia */
+  .phone {
+    padding: 0.75cqi;
+    border-radius: 3.4cqi;
+    background: linear-gradient(160deg, #3a3b3f, #0d0d0f 40%);
+    box-shadow:
+      inset 0 0 0 0.18cqi rgb(255 255 255 / 0.12),
+      0 1cqi 2.4cqi rgb(0 0 0 / 0.22);
+  }
+  .phone__screen {
+    position: relative;
+    aspect-ratio: 9 / 16.6;
+    border-radius: 2.5cqi;
+    overflow: hidden;
+    background: #000;
+  }
+  .phone__screen > :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .phone__island {
+    position: absolute;
+    left: 50%;
+    top: 0.55cqi;
+    width: 24%;
+    height: 1.05cqi;
+    translate: -50% 0;
+    border-radius: 999px;
+    background: #000;
+  }
+  .phone__bars {
+    position: absolute;
+    left: 1.2cqi;
+    right: 1.2cqi;
+    top: 2.1cqi;
+    display: flex;
+    gap: 0.4cqi;
+  }
+  .phone__bars i {
+    flex: 1;
+    height: 0.3cqi;
+    min-height: 2px;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 0.4);
+  }
+  .phone__bars i.on {
+    background: #fff;
+  }
+
+  /* pantalla de app: más alta que una historia, y desde arriba */
+  .phone__screen--app {
+    aspect-ratio: 9 / 19.5;
+    background: #fff;
+  }
+  .phone__screen--app > :global(img) {
+    object-position: 50% 0;
+    padding-top: 2.2cqi;
+    background: #fff;
+  }
+
+  /* página web en una ventana: si es más larga que la ventana, al pasar se recorre hasta abajo */
+  .browser {
+    border-radius: 1.3cqi;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.08),
+      0 1cqi 2.4cqi rgb(0 0 0 / 0.22);
+  }
+  .browser__bar {
+    display: flex;
+    gap: 0.6cqi;
+    padding: 1cqi 1.2cqi;
+    background: #ecedef;
+    border-bottom: 1px solid rgb(0 0 0 / 0.07);
+  }
+  .browser__bar i {
+    width: 1cqi;
+    min-width: 6px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #d3d5d9;
+  }
+  .browser__page {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+  .browser__page :global(img) {
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0;
+    transition: object-position 4.5s cubic-bezier(0.45, 0, 0.3, 1);
+  }
+  .piece:hover .browser__page :global(img) {
+    object-position: 50% 100%;
+  }
+
+  /* perfil con su grilla */
+  .phone__screen--profile {
+    aspect-ratio: 9 / 18;
+    padding: 3.4cqi 0.5cqi 0;
+    background: #0f0f10;
+  }
+  .profile__head {
+    display: flex;
+    align-items: center;
+    gap: 0.9cqi;
+    padding: 0 1cqi 1.2cqi;
+    color: #fff;
+    font-size: max(9px, 1.25cqi);
+  }
+  .profile__head i,
+  .post__head i,
+  .banner__who i {
+    display: grid;
+    place-items: center;
+    flex: none;
+    border-radius: 50%;
+    font-style: normal;
+    font-weight: 650;
+    color: #fff;
+    background: var(--bg);
+    box-shadow: 0 0 0 0.25cqi rgb(255 255 255 / 0.9);
+  }
+  .profile__head i {
+    width: 3.4cqi;
+    height: 3.4cqi;
+    font-size: max(9px, 1.4cqi);
+  }
+  .profile__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25cqi;
+  }
+  .profile__grid :global(img) {
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  /* pantalla de transmisión: marco fino y la barra del reproductor */
+  .screen {
+    position: relative;
+    padding: 0.55cqi;
+    border-radius: 1.5cqi;
+    background: #0d0d0f;
+    box-shadow:
+      inset 0 0 0 0.15cqi rgb(255 255 255 / 0.1),
+      0 1cqi 2.4cqi rgb(0 0 0 / 0.22);
+  }
+  .screen > :global(img) {
+    border-radius: 1cqi;
+  }
+  .screen__bar {
+    position: absolute;
+    left: 0.55cqi;
+    right: 0.55cqi;
+    bottom: 0.55cqi;
+    display: flex;
+    align-items: center;
+    gap: 1.2cqi;
+    padding: 2.4cqi 1.6cqi 1.3cqi;
+    border-radius: 0 0 1cqi 1cqi;
+    background: linear-gradient(transparent, rgb(0 0 0 / 0.55));
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .piece:hover .screen__bar {
+    opacity: 1;
+  }
+  .screen__bar svg {
+    width: 1.3cqi;
+    min-width: 8px;
+    fill: #fff;
+  }
+  .screen__bar i {
+    flex: 1;
+    height: 0.35cqi;
+    min-height: 2px;
+    border-radius: 2px;
+    background: rgb(255 255 255 / 0.35);
+  }
+  .screen__bar b {
+    display: block;
+    width: 38%;
+    height: 100%;
+    border-radius: inherit;
+    background: #fff;
+  }
+
+  /* publicación */
+  .post {
+    padding: 1.1cqi 0 1.2cqi;
+    border-radius: 1.6cqi;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 1cqi 2.4cqi rgb(0 0 0 / 0.22);
+  }
+  .post__head {
+    display: flex;
+    align-items: center;
+    gap: 0.9cqi;
+    padding: 0 1.2cqi 1cqi;
+    font-size: max(9px, 1.35cqi);
+    font-weight: 600;
+    color: #111;
+  }
+  .post__head i {
+    width: 3cqi;
+    height: 3cqi;
+    font-size: max(8px, 1.3cqi);
+    box-shadow: none;
+  }
+  .post__icons {
+    display: flex;
+    gap: 1.3cqi;
+    padding: 1.1cqi 1.2cqi 0;
+  }
+  .post__icons svg {
+    width: 2.2cqi;
+    min-width: 12px;
+    fill: none;
+    stroke: #111;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+  }
+
+  /* encabezado de perfil */
+  .banner {
+    padding-bottom: 1.6cqi;
+    border-radius: 1.6cqi;
+    background: #0f0f10;
+    overflow: hidden;
+    box-shadow: 0 1cqi 2.4cqi rgb(0 0 0 / 0.22);
+  }
+  .banner__who {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.2cqi;
+    margin: -3.6cqi 0 0 2cqi;
+    position: relative;
+    color: #fff;
+    font-size: max(10px, 1.5cqi);
+  }
+  .banner__who i {
+    width: 7cqi;
+    height: 7cqi;
+    font-size: max(12px, 2.6cqi);
+    box-shadow: 0 0 0 0.5cqi #0f0f10;
+  }
+  .banner__who b {
+    padding-bottom: 0.6cqi;
+    font-weight: 650;
+  }
+
+  /* en cajas angostas, todo al doble (y lo ancho, a lo ancho) */
+  @container (max-width: 560px) {
+    .stage {
+      padding-top: 56px;
+    }
+    .piece {
+      width: min(100%, calc(var(--w) * 2.4));
+    }
+  }
+</style>

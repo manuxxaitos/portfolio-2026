@@ -1,0 +1,146 @@
+---
+/**
+ * Tarjetas que se inclinan con el cursor (efecto tilt): cada una gira un poco
+ * hacia el puntero, con un brillo que lo sigue y la sombra que se corre. Al
+ * tocar una, pasa adelante. Con movimiento reducido quedan quietas.
+ */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  cards: { img: ImageMetadata; alt: string }[];
+  bg: string;
+  /** ancho de cada tarjeta, en % del cuadro */
+  width: number;
+  label: string;
+}
+const { cards, bg, width, label } = Astro.props;
+---
+
+<div class="tilt" data-tilt role="group" aria-label={label} style={`--bg:${bg};--cw:${width}%`} data-say="Movelas: se inclinan">
+  {
+    cards.map((c, i) => (
+      <figure class="tilt__card" data-tilt-card style={`--i:${i};--n:${cards.length}`}>
+        <div class="tilt__inner">
+          <Picture
+            src={c.img}
+            alt={c.alt}
+            formats={['avif', 'webp']}
+            widths={[360, 540, 720, 1000].filter((w) => w <= c.img.width)}
+            sizes={`(min-width: 1100px) ${Math.round(width * 11)}px, ${width}vw`}
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="tilt__glare" aria-hidden="true" />
+        </div>
+      </figure>
+    ))
+  }
+</div>
+
+<script>
+  import { emit } from '../scripts/events';
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((root) => {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-tilt-card]')];
+    // tocar una la pasa adelante (avisa tilt:front solo si cambió cuál va adelante)
+    cards.forEach((c) =>
+      c.addEventListener('click', () => {
+        if (c.classList.contains('is-front')) return;
+        cards.forEach((x) => x.classList.toggle('is-front', x === c));
+        emit('tilt:front');
+      }),
+    );
+    if (reduced) return;
+    const state = cards.map(() => ({ rx: 0, ry: 0, tx: 0, ty: 0, gx: 50, gy: 30, tgx: 50, tgy: 30 }));
+    let raf = 0;
+    const loop = () => {
+      raf = 0;
+      let moving = false;
+      cards.forEach((c, i) => {
+        const s = state[i];
+        s.rx += (s.tx - s.rx) * 0.12;
+        s.ry += (s.ty - s.ry) * 0.12;
+        s.gx += (s.tgx - s.gx) * 0.12;
+        s.gy += (s.tgy - s.gy) * 0.12;
+        if (Math.abs(s.tx - s.rx) + Math.abs(s.ty - s.ry) > 0.02) moving = true;
+        c.style.setProperty('--rx', `${s.rx.toFixed(2)}deg`);
+        c.style.setProperty('--ry', `${s.ry.toFixed(2)}deg`);
+        c.style.setProperty('--gx', `${s.gx.toFixed(1)}%`);
+        c.style.setProperty('--gy', `${s.gy.toFixed(1)}%`);
+      });
+      if (moving) raf = requestAnimationFrame(loop);
+    };
+    const kick = () => !raf && (raf = requestAnimationFrame(loop));
+    root.addEventListener('pointermove', (e) => {
+      cards.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const dx = (e.clientX - (r.left + r.width / 2)) / r.width;
+        const dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+        const s = state[i];
+        // la que está más cerca del cursor se inclina más
+        const near = Math.max(0, 1 - Math.hypot(dx, dy) / 1.6);
+        s.ty = Math.max(-1, Math.min(1, dx)) * 14 * near;
+        s.tx = -Math.max(-1, Math.min(1, dy)) * 12 * near;
+        s.tgx = 50 + dx * 90;
+        s.tgy = 50 + dy * 90;
+      });
+      kick();
+    });
+    root.addEventListener('pointerleave', () => {
+      state.forEach((s) => ((s.tx = 0), (s.ty = 0), (s.tgx = 50), (s.tgy = 30)));
+      kick();
+    });
+  });
+</script>
+
+<style>
+  .tilt {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5%;
+    background: var(--bg);
+    perspective: 1100px;
+  }
+  .tilt__card {
+    position: relative;
+    z-index: 1;
+    width: var(--cw);
+    transform: translateY(calc((var(--i) - 0.5) * 7%)) rotate(calc((var(--i) - 0.5) * 5deg));
+    transition: z-index 0s, transform 0.5s var(--spring);
+    cursor: pointer;
+  }
+  .tilt__card:global(.is-front) {
+    z-index: 2;
+  }
+  .tilt__inner {
+    position: relative;
+    border-radius: 12px;
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transform-style: preserve-3d;
+    box-shadow:
+      calc(var(--ry, 0deg) / 1deg * -0.9px) calc(18px + var(--rx, 0deg) / 1deg * 0.9px) 30px -12px rgb(60 30 0 / 0.35),
+      0 2px 6px rgb(60 30 0 / 0.18);
+    will-change: transform;
+  }
+  .tilt__inner :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: inherit;
+  }
+  /* brillo de cartulina laminada que sigue al cursor */
+  .tilt__glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgb(255 255 255 / 0.32), rgb(255 255 255 / 0) 45%);
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+  }
+
+</style>

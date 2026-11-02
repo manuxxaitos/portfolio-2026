@@ -1,0 +1,273 @@
+---
+import { Image } from 'astro:assets';
+import Media from './Media.astro';
+import Arrow from './Arrow.astro';
+import SectionHead from './SectionHead.astro';
+import Window from './Window.astro';
+import { opensWindow, type Media as M, type Project } from '../data/types';
+
+interface Props {
+  featured: Project[];
+  others: Project[];
+}
+const { featured, others } = Astro.props;
+const ratioOf = (m: M) => {
+  if (m.kind === 'image') return m.img.width / m.img.height;
+  const [w, h] = m.ratio.split('/').map(Number);
+  return w / h;
+};
+/* sitios: directo al sitio; el resto, a su ventana. data-say es lo que dice la burbuja del cursor */
+const link = (p: Project, list = false) =>
+  opensWindow(p)
+    ? { href: `#${p.slug}`, 'data-open': p.slug, 'data-say': p.hover ?? (list ? 'Mirá este proyecto' : 'Abrimos la galería') }
+    : { href: p.url!.href, target: '_blank', rel: 'noopener', 'data-say': p.hover ?? 'Te llevo al sitio' };
+const windows = [...featured, ...others].filter(opensWindow);
+const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
+---
+
+<section
+  id="proyectos"
+  class="col sec"
+  aria-labelledby="proyectos-t"
+  data-ambient={JSON.stringify(['Las que tienen ↗ van al sitio', 'Las otras se abren acá mismo'])}
+>
+  <SectionHead n={1} id="proyectos-t" title="Proyectos" />
+  <ul class="grid">
+    {
+      featured.map((p) => {
+        const win = opensWindow(p);
+        const fit = ratioOf(p.cover) >= 1.3 ? 'cover' : 'contain';
+        return (
+          <li class:list={['card', wide(p) && 'card--wide']} data-reveal>
+            <a class="card__link" {...link(p)}>
+              <div class:list={['card__media', `card__media--${fit}`]} style={p.tone ? `background:${p.tone}` : undefined}>
+                <Media item={p.cover} fit={fit} sizes={wide(p) ? '(min-width: 840px) 760px, 100vw' : '(min-width: 840px) 370px, 100vw'} />
+                <span class="card__hint glass" aria-hidden="true">
+                  {win ? (
+                    <>
+                      <i class="mini" />
+                      <i class="mini" />
+                      <i class="mini" /> Abrir
+                    </>
+                  ) : (
+                    <>
+                      Ir al sitio <Arrow dir="up-right" />
+                    </>
+                  )}
+                </span>
+              </div>
+              <div class="card__cap">
+                <h3 class="card__title">
+                  {p.title}
+                  {!win && <Arrow dir="up-right" class="card__ext" />}
+                </h3>
+                <span class="card__what">{p.what}</span>
+              </div>
+              <p class="card__line">{p.line}</p>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<section class="col sec" aria-labelledby="mas-t">
+  <SectionHead n={2} id="mas-t" title="Más proyectos" />
+  <ul class="list">
+    {
+      others.map((p) => (
+        <li data-reveal>
+          <a class="row" {...link(p, true)}>
+            <span class="row__icon" aria-hidden="true">
+              <Image src={p.thumb} alt="" widths={[48, 96]} sizes="24px" loading="lazy" decoding="async" />
+            </span>
+            <span class="row__name">{p.title}</span>
+            <span class="row__what">{p.what}</span>
+            <span class="row__line">{p.line}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+{windows.map((p, i) => <Window p={p} prev={windows[(i - 1 + windows.length) % windows.length]} next={windows[(i + 1) % windows.length]} />)}
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 20px;
+  }
+  .card--wide {
+    grid-column: 1 / -1;
+  }
+  .card--wide .card__media {
+    aspect-ratio: 21 / 9;
+  }
+  .card__link {
+    display: block;
+    text-decoration: none;
+  }
+  .card__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    isolation: isolate;
+    box-shadow: inset 0 0 0 1px rgb(18 19 20 / 0.04);
+  }
+  .card__media--contain {
+    display: grid;
+    place-items: center;
+    padding: 7% 0;
+  }
+  .card__media :global(.media--cover),
+  .card__media :global(.media--contain) {
+    transition: transform 1.2s var(--ease-out);
+  }
+  .card__link:hover .card__media :global(.media--cover),
+  .card__link:hover .card__media :global(.media--contain) {
+    transform: scale(1.03);
+  }
+
+  /* con teclado asoma una pastilla de vidrio que dice qué pasa al entrar (con mouse lo dice la burbuja) */
+  .card__hint {
+    position: absolute;
+    z-index: 2;
+    left: 10px;
+    bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+    transition:
+      opacity 0.25s var(--ease-out),
+      transform 0.45s var(--spring);
+  }
+  .card__hint :global(svg) {
+    width: 10px;
+    height: 10px;
+  }
+  .mini {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ff5245;
+    box-shadow: inset 0 0 0 0.5px rgb(0 0 0 / 0.3);
+  }
+  .mini:nth-child(2) {
+    background: #ffb420;
+  }
+  .mini:nth-child(3) {
+    margin-right: 4px;
+    background: #33c43f;
+  }
+  .card__link:focus-visible .card__hint {
+    opacity: 1;
+    transform: none;
+  }
+
+  .card__cap {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .card__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--f-sans);
+    font-size: 1rem;
+    font-weight: 560;
+    letter-spacing: -0.01em;
+  }
+  .card__title :global(.card__ext) {
+    width: 11px;
+    height: 11px;
+    color: var(--ink-3);
+    transition: transform 0.35s var(--spring);
+  }
+  .card__link:hover :global(.card__ext) {
+    transform: translate(2px, -2px);
+    color: var(--signal);
+  }
+  .card__what {
+    flex: none;
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .card__line {
+    margin-top: 4px;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+
+  /* lista: icono, nombre y una línea */
+  .list {
+    display: grid;
+    gap: 22px;
+  }
+  .row {
+    display: grid;
+    grid-template-columns: 24px auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2px 10px;
+    text-decoration: none;
+  }
+  .row__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 0.5px rgb(18 19 20 / 0.2);
+    transition: transform 0.4s var(--spring);
+  }
+  .row__icon :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .row:hover .row__icon {
+    transform: rotate(-8deg) scale(1.12);
+  }
+  .row__name {
+    font-weight: 560;
+    text-decoration: underline dotted var(--ink-3);
+    text-underline-offset: 0.3em;
+  }
+  .row:hover .row__name {
+    text-decoration-style: solid;
+    text-decoration-color: var(--signal);
+  }
+  .row__what {
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .row__line {
+    grid-column: 2 / -1;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+    .card--wide .card__media {
+      aspect-ratio: 16 / 10;
+    }
+  }
+</style>

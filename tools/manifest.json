@@ -1,0 +1,478 @@
+{
+ "images": [
+  {
+   "src": "/tmp/portfolio-scout/web2/lym-studio-desktop.png",
+   "out": "lym/studio.jpg",
+   "w": 2000,
+   "q": 88,
+   "crop": [
+    0,
+    0,
+    1440,
+    810
+   ]
+  },
+  {
+   "src": "/tmp/portfolio-scout/web2/precionauta-home-desktop.png",
+   "out": "precionauta/home.jpg",
+   "w": 2000,
+   "q": 88,
+   "crop": [
+    0,
+    0,
+    1440,
+    810
+   ]
+  },
+  {
+   "src": "$ORIGINALES/AISH/BEHANCE/IMG 2/Sistema visual AISH – Etapa exploratoria_Página_02.jpg",
+   "out": "aish/todo-puede-pasar.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/LYM/HILICH/0_ENTREGA_BRANDING/00_BRANDBOOK/BEHANCE/HILICH | BRANDBOOK_Página_01.jpg",
+   "out": "hilich/brandbook-01.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/LYM/HILICH/0_ENTREGA_BRANDING/00_BRANDBOOK/BEHANCE/HILICH | BRANDBOOK_Página_02.jpg",
+   "out": "hilich/brandbook-02.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/LYM/HILICH/0_ENTREGA_BRANDING/00_BRANDBOOK/BEHANCE/HILICH | BRANDBOOK_Página_08.jpg",
+   "out": "hilich/brandbook-08.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/LYM/HILICH/0_ENTREGA_BRANDING/00_BRANDBOOK/BEHANCE/HILICH | BRANDBOOK_Página_21.jpg",
+   "out": "hilich/brandbook-21.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/SUPPLYCON/06 - ENTREGAS/07. MOCKUPS/BOX.jpg",
+   "out": "supplycon/caja.jpg",
+   "w": 2000,
+   "q": 88,
+   "crop": [
+    0,
+    375,
+    4000,
+    2625
+   ]
+  },
+  {
+   "src": "$ORIGINALES/SUPPLYCON/06 - ENTREGAS/07. MOCKUPS/IPHONE.jpg",
+   "out": "supplycon/iphone.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "$ORIGINALES/SUPPLYCON/06 - ENTREGAS/JPEG2/SUPPLYCON | BRANDBOOK_Página_13.jpg",
+   "out": "supplycon/brandbook-13.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "/tmp/portfolio-scout/me/pdf/kune-p-01.png",
+   "out": "kune/informe-01.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "/tmp/portfolio-scout/me/pdf/kune-p-26.png",
+   "out": "kune/informe-26.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "/tmp/portfolio-scout/me/pdf/kune-p-44.png",
+   "out": "kune/informe-44.jpg",
+   "w": 2000,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/render-family.png",
+   "out": "kench/render-familia.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/render-hero.png",
+   "out": "kench/toy-poster.jpg",
+   "w": 2000,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/render-tokens.png",
+   "out": "kench/render-fichas.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/render-neon.png",
+   "out": "kench/render-neon.jpg",
+   "w": 1600,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/behance-01.webp",
+   "out": "kench/bh-portada.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/behance-02.webp",
+   "out": "kench/bh-trama.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/behance-03.webp",
+   "out": "kench/bh-logo.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/behance-07.webp",
+   "out": "kench/bh-paleta-logos.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/behance-08.webp",
+   "out": "kench/bh-tipografia.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/kench/src/behance-13.webp",
+   "out": "kench/bh-ambiente-1.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/behance-14.webp",
+   "out": "kench/bh-ambiente-2.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/kench/src/brandbook-3.png",
+   "out": "kench/bb-blanco.jpg",
+   "w": 1200,
+   "q": 90
+  },
+  {
+   "src": "tools/kench/src/brandbook-4.png",
+   "out": "kench/bb-negro.jpg",
+   "w": 1200,
+   "q": 90
+  },
+  {
+   "src": "tools/kench/src/brandbook-5.png",
+   "out": "kench/bb-crema.jpg",
+   "w": 1200,
+   "q": 90
+  },
+  {
+   "src": "tools/kench/src/brandbook-6.png",
+   "out": "kench/bb-rojo.jpg",
+   "w": 1200,
+   "q": 90
+  },
+  {
+   "src": "tools/kench/src/card-front.png",
+   "out": "kench/tarjeta-frente.png",
+   "w": 1200
+  },
+  {
+   "src": "tools/kench/src/card-back.png",
+   "out": "kench/tarjeta-dorso.png",
+   "w": 1200
+  },
+  {
+   "src": "tools/aish/src/render-hero.png",
+   "out": "aish/toy-poster.jpg",
+   "w": 2000,
+   "q": 86
+  },
+  {
+   "src": "tools/aish/src/render-cromo.png",
+   "out": "aish/render-cromo.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/aish/src/render-bola.png",
+   "out": "aish/render-bola.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/aish/src/render-estrellas.png",
+   "out": "aish/render-estrellas.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/aish/src/behance-02.webp",
+   "out": "aish/bh-todo-puede-pasar.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-07.webp",
+   "out": "aish/bh-rediseno.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-11.webp",
+   "out": "aish/bh-color.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-14.webp",
+   "out": "aish/bh-tipo-funcional.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-16.webp",
+   "out": "aish/bh-tipo-experimental.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-17.webp",
+   "out": "aish/bh-exorcismo.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-30.webp",
+   "out": "aish/bh-moodboard.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/aish/src/behance-32.webp",
+   "out": "aish/flyer-1.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-33.webp",
+   "out": "aish/flyer-2.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/aish/src/behance-34.webp",
+   "out": "aish/foto-1.jpg",
+   "w": 1200,
+   "q": 84
+  },
+  {
+   "src": "tools/aish/src/behance-35.webp",
+   "out": "aish/foto-2.jpg",
+   "w": 1200,
+   "q": 84
+  },
+  {
+   "src": "tools/aish/src/behance-39.webp",
+   "out": "aish/foto-3.jpg",
+   "w": 1200,
+   "q": 84
+  },
+  {
+   "src": "tools/aish/src/behance-41.webp",
+   "out": "aish/foto-4.jpg",
+   "w": 1200,
+   "q": 84
+  },
+  {
+   "src": "tools/aish/src/behance-42.webp",
+   "out": "aish/foto-5.jpg",
+   "w": 1200,
+   "q": 84
+  },
+  {
+   "src": "tools/aish/src/render-detalle.png",
+   "out": "aish/render-detalle.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/render-hero.png",
+   "out": "supplycon/toy-poster.jpg",
+   "w": 2000,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/render-familia.png",
+   "out": "supplycon/render-familia.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/render-escalones.png",
+   "out": "supplycon/render-escalones.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/render-ladrillos.png",
+   "out": "supplycon/render-ladrillos.jpg",
+   "w": 2400,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/bb-02.jpg",
+   "out": "supplycon/bb-ambiente.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/bb-07.jpg",
+   "out": "supplycon/bb-paleta-logos.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/bb-08.jpg",
+   "out": "supplycon/bb-trama.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/bb-09.jpg",
+   "out": "supplycon/bb-tipografia.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/bb-11.jpg",
+   "out": "supplycon/bb-titulos.jpg",
+   "w": 2400,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/feed-1.jpg",
+   "out": "supplycon/feed-1.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/feed-2.jpg",
+   "out": "supplycon/feed-2.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/feed-3.jpg",
+   "out": "supplycon/feed-3.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/story-1.jpg",
+   "out": "supplycon/story-1.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/story-2.jpg",
+   "out": "supplycon/story-2.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/story-3.jpg",
+   "out": "supplycon/story-3.jpg",
+   "w": 1080,
+   "q": 88
+  },
+  {
+   "src": "tools/supplycon/src/mock-bolsa.png",
+   "out": "supplycon/mock-bolsa.jpg",
+   "w": 2000,
+   "q": 86,
+   "bg": "#efefed"
+  },
+  {
+   "src": "tools/supplycon/src/mock-tarjeta.jpg",
+   "out": "supplycon/mock-tarjeta.jpg",
+   "w": 2000,
+   "q": 86
+  },
+  {
+   "src": "tools/supplycon/src/tarjeta-carbon-frente.png",
+   "out": "supplycon/tarjeta-frente.jpg",
+   "w": 1200,
+   "q": 90
+  },
+  {
+   "src": "tools/supplycon/src/tarjeta-crema-dorso.png",
+   "out": "supplycon/tarjeta-dorso.jpg",
+   "w": 1200,
+   "q": 90
+  }
+ ],
+ "videos": [
+  {
+   "src": "$ORIGINALES/METAPHYSIS/LABEL/CAUSE AND EFFECT/EXPORT FINAL/VIDEO.mp4",
+   "out": "metaphysis/cause-effect",
+   "ss": 0.5,
+   "t": 7,
+   "w": 1080,
+   "fps": 25,
+   "crf": 27,
+   "crf_av1": 42,
+   "poster_at": 1
+  },
+  {
+   "src": "$ORIGINALES/METAPHYSIS/LABEL/FIAMMA EP/EXPORTS/IG STORY/PULSE.mp4",
+   "out": "metaphysis/pulse",
+   "ss": 20,
+   "t": 5.5,
+   "w": 720,
+   "fps": 25,
+   "crf": 26,
+   "crf_av1": 40,
+   "poster_at": 0.5,
+   "crop": "1080:1350:0:285"
+  },
+  {
+   "src": "$ORIGINALES/AISH/_TEST/V2/VIDEO/HIST2.mp4",
+   "out": "aish/historia",
+   "ss": 11.2,
+   "t": 8,
+   "w": 720,
+   "fps": 25,
+   "crf": 26,
+   "crf_av1": 40,
+   "poster_at": 1,
+   "crop": "1080:1350:0:285"
+  },
+  {
+   "src": "$ORIGINALES/RENATA DI CROCE/Visualizer/EMPAPADA/EXPORT/Empapada.mp4",
+   "out": "peregrina/empapada",
+   "ss": 10,
+   "t": 8,
+   "w": 1280,
+   "fps": 30,
+   "crf": 26,
+   "crf_av1": 40,
+   "poster_at": 1,
+   "crop": "1920:1080:0:0"
+  }
+ ]
+}

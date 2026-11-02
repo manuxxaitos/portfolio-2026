@@ -1,0 +1,84 @@
+---
+import { Image } from 'astro:assets';
+import avatar from '../assets/me/avatar.jpg';
+
+const email = 'tomascardozo98@gmail.com';
+---
+
+<section class="intro col" aria-labelledby="intro-title">
+  <h1 id="intro-title" class="intro__hi">
+    Soy <strong>Tomás</strong><span class="sr-only">,</span>
+    <span class="intro__face" aria-hidden="true" data-say="¡Hola! Ese soy yo">
+      <Image src={avatar} alt="" widths={[64, 128]} sizes="34px" loading="eager" fetchpriority="high" />
+    </span>
+    <strong>diseñador</strong> en Buenos Aires.
+  </h1>
+  <p>Diseño marcas, sitios y productos.</p>
+  <p>
+    Tomo proyectos freelance. Escribime a <a href={`mailto:${email}`} data-say="¿Charlamos?">{email}</a>, o mirá lo que hago en{' '}
+    <a href="https://github.com/manuxxaitos" rel="me noopener" target="_blank" data-say="Mi código, por acá">GitHub</a>{' '}y{' '}
+    <a href="https://www.behance.net/tomasecardozo" rel="me noopener" target="_blank" data-say="Más diseño en Behance">Behance</a>.
+  </p>
+</section>
+
+<style>
+  .intro {
+    padding-top: clamp(72px, 14vh, 144px);
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--ink-3);
+  }
+  .intro p {
+    margin-top: 14px;
+  }
+  .intro__hi {
+    font-family: var(--f-sans);
+    font-size: inherit;
+    font-weight: 450;
+    line-height: inherit;
+    letter-spacing: inherit;
+    text-wrap: pretty;
+  }
+  strong {
+    font-weight: 560;
+    color: var(--ink);
+  }
+  a {
+    color: var(--ink);
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-decoration-color: var(--ink-3);
+    text-underline-offset: 0.28em;
+    transition: text-decoration-color 0.2s;
+  }
+  a:hover {
+    text-decoration-style: solid;
+    text-decoration-color: var(--signal);
+  }
+
+  /* la cara, inclinada; al pasar por encima se balancea (y la burbuja del cursor saluda) */
+  .intro__face {
+    position: relative;
+    display: inline-block;
+    width: 1.75em;
+    height: 1.75em;
+    margin: 0 0.3em;
+    vertical-align: -0.55em;
+    border-radius: 0.45em;
+    background: var(--surface);
+    box-shadow:
+      0 0 0 0.5px rgb(18 19 20 / 0.2),
+      0 6px 14px -6px rgb(18 19 20 / 0.45);
+    transform: rotate(-5deg);
+    transition: transform 0.5s var(--spring);
+  }
+  .intro__face :global(img) {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+  }
+  .intro__face:hover {
+    transform: rotate(6deg) scale(1.08);
+  }
+</style>

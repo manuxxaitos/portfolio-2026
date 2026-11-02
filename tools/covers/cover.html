@@ -1,0 +1,32 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Inter;src:url('../../public/fonts/inter-var.woff2')}
+*{box-sizing:border-box;margin:0}html,body{width:1600px;height:1000px;overflow:hidden;font-family:Inter}
+.c{position:relative;width:1600px;height:1000px;overflow:hidden}
+.win{position:absolute;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.08),0 40px 90px -30px rgba(0,0,0,.45)}
+.win .bar{height:34px;display:flex;align-items:center;gap:7px;padding:0 14px;background:#f3f3f1;border-bottom:1px solid #e3e3df}
+.win .bar i{width:10px;height:10px;border-radius:50%;background:#d6d6d1}
+.win .bar span{margin-left:14px;font-size:12px;color:#8a8d91;background:#fff;border:1px solid #e3e3df;border-radius:6px;padding:2px 10px}
+.win img{display:block;width:100%}
+.dark .bar{background:#1f1f22;border-color:#2c2c30}.dark .bar i{background:#3a3a3f}.dark .bar span{background:#2a2a2e;border-color:#36363b;color:#9b9ba3}
+.ph{position:absolute;border-radius:38px;padding:9px;background:#111;box-shadow:0 40px 80px -30px rgba(0,0,0,.55)}
+.ph img{display:block;width:100%;border-radius:30px}
+.sq{position:absolute;box-shadow:0 30px 70px -28px rgba(0,0,0,.6);border-radius:10px;overflow:hidden}.sq img{display:block;width:100%}
+</style></head><body><div class="c" id="c"></div>
+<script>
+const W1=new URL('src/',location.href).pathname,W2=W1,A=new URL('../../src/assets/work/',location.href).pathname;
+const win=(src,x,y,w,url,dark)=>`<div class="win ${dark?'dark':''}" style="left:${x}px;top:${y}px;width:${w}px"><div class="bar"><i></i><i></i><i></i><span>${url}</span></div><img src="file://${src}"></div>`;
+const crop=(src,h)=>`<div style="height:${h}px;overflow:hidden"><img src="file://${src}" style="width:100%"></div>`;
+const winc=(src,x,y,w,h,url,dark)=>`<div class="win ${dark?'dark':''}" style="left:${x}px;top:${y}px;width:${w}px"><div class="bar"><i></i><i></i><i></i><span>${url}</span></div>${crop(src,h)}</div>`;
+const ph=(src,x,y,w,h)=>`<div class="ph" style="left:${x}px;top:${y}px;width:${w}px"><div style="height:${h}px;overflow:hidden;border-radius:30px"><img src="file://${src}"></div></div>`;
+const sq=(src,x,y,w,r=0)=>`<div class="sq" style="left:${x}px;top:${y}px;width:${w}px;transform:rotate(${r}deg)"><img src="file://${src}"></div>`;
+const L={
+ lym:{bg:'#e7e0d4',h:winc(W2+'lym-studio-desktop.png',150,150,1080,676,'lym-studio.com')+ph(W2+'lym-studio-mobile.png',1150,290,300,600)},
+ medibra:{bg:'#dde9e3',h:winc(W2+'medibra-saude-desktop.png',150,150,1080,676,'+saúde')+ph(W2+'medibra-saude-mobile.png',1150,290,300,600)},
+ precionauta:{bg:'#241c3b',h:winc(W2+'precionauta-home-desktop.png',120,190,1100,688,'precionauta',true)+`<img src="../../_originales/PRECIONAUTA/04-Diseno/personajes/character-pose-1.png" style="position:absolute;left:1060px;top:170px;width:470px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.5))">`},
+ cirilog:{bg:'#e4e8ee',h:winc(W2+'cirilog-dashboard.png',140,110,1320,825,'cirilog')},
+ aish:{bg:'#0e0e0e',h:sq(A+'aish/flyer.jpg',110,230,440,-3)+sq(A+'aish/feed.jpg',580,200,440,0)+sq(A+'aish/sistema-28.jpg',1050,300,460,3)},
+ peregrina:{bg:'#e9dccb',h:sq(A+'peregrina/portada.jpg',170,170,560,-2)+sq(A+'peregrina/marron.jpg',700,250,760,2)},
+};
+L.esports={bg:'#111214',h:[['river-07',-14,170],['boca-06',-7,430],['fire-13',0,690],['batalla-08',7,950],['vcl-10',14,1210]].map(([f,r,x],i)=>`<div class="sq" style="left:${x-120}px;top:${i===2?200:i%2?240:280}px;width:${f.startsWith('batalla')||f.startsWith('vcl')?330:300}px;transform:rotate(${r*.6}deg);z-index:${i===2?5:3-Math.abs(2-i)}"><img src="file://${A}esports/${f}.jpg"></div>`).join('')};
+const k=location.hash.slice(1),d=L[k];document.body.style.background=d.bg;document.getElementById('c').innerHTML=d.h;
+</script></body></html>

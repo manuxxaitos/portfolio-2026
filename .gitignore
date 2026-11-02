@@ -1,0 +1,18 @@
+# dependencias y compilados
+node_modules/
+dist/
+.astro/
+.vercel/
+
+# sistema
+.DS_Store
+*.log
+.env
+.env.*
+
+# material apartado del sitio (no se publica)
+_versiones/
+
+# fuentes de trabajo de las herramientas (imágenes sacadas de originales de clientes) y la copia de CiriLog para las capturas
+tools/*/src/
+tools/cirilog-mock/

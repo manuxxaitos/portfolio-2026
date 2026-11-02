@@ -1,0 +1,23 @@
+---
+interface Props {
+  n: number;
+  id: string;
+  title: string;
+}
+const { n, id, title } = Astro.props;
+---
+
+<h2 class="sh" id={id}><span class="bead" aria-hidden="true">{n}</span>{title}</h2>
+
+<style>
+  .sh {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    font-family: var(--f-sans);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+  }
+</style>
