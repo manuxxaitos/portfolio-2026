@@ -328,7 +328,7 @@ function roomImpulse(c: AudioContext) {
 }
 
 function ensure() {
-  if (ctx) return ctx;
+  if (ctx && ctx.state !== 'closed') return ctx;
   ctx = new AudioContext({ latencyHint: 'interactive' });
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -18;
@@ -359,8 +359,8 @@ export function play(name: SoundName): boolean {
     c.resume().then(() => {
       const w = waiting;
       waiting = null;
-      if (w && performance.now() - w.at < 450) play(w.name);
-    });
+      if (w && performance.now() - w.at < 1000) play(w.name);
+    }, () => {});
     return false;
   }
   const fx: Fx = SOUNDS[name];
@@ -416,16 +416,21 @@ export function sound() {
   render();
 
   // el navegador deja arrancar el audio recién con un gesto (clic o tecla)
+  // en cada gesto, si el audio quedó dormido (Safari lo duerme al cambiar de pestaña), se lo despierta ahí mismo:
+  // reanudar y dar un sonido mudo dentro del gesto es lo que Safari pide para dejarlo sonar
   const unlock = () => {
     gestured = true;
-    if (!enabled) return;
+    if (!enabled || document.hidden) return;
     const c = ensure();
-    if (c.state !== 'running' && !document.hidden) c.resume();
+    if (c.state === 'running') return;
+    c.resume().catch(() => {});
+    const mute = c.createBufferSource();
+    mute.buffer = c.createBuffer(1, 1, c.sampleRate);
+    mute.connect(c.destination);
+    mute.start(0);
   };
-  addEventListener('pointerdown', unlock, { capture: true, passive: true });
-  addEventListener('keydown', unlock, { capture: true });
-  addEventListener('touchend', unlock, { capture: true, passive: true });
-  addEventListener('click', unlock, { capture: true });
+  for (const ev of ['pointerdown', 'mousedown', 'pointerup', 'touchend', 'keydown', 'click'])
+    addEventListener(ev, unlock, { capture: true, passive: true });
 
   btn?.addEventListener('click', async () => {
     enabled = !enabled;
@@ -436,7 +441,7 @@ export function sound() {
     }
     render();
     if (enabled) {
-      await ensure().resume();
+      await ensure().resume().catch(() => {});
       play('on');
       emit('buddy:say', 'Sonido activado');
     } else {
@@ -445,10 +450,13 @@ export function sound() {
     }
   });
 
+  // no se suspende al ocultar la pestaña: play() ya no suena con la pestaña oculta, y reanudar sin un gesto es justo
+  // lo que Safari no deja (quedaba mudo hasta apagar y prender el botón). Al volver, se intenta; si no, el próximo gesto
   document.addEventListener('visibilitychange', () => {
-    if (!ctx) return;
-    if (document.hidden) ctx.suspend();
-    else if (enabled) ctx.resume();
+    if (ctx && enabled && !document.hidden && ctx.state !== 'running') ctx.resume().catch(() => {});
+  });
+  addEventListener('pageshow', (e) => {
+    if (e.persisted && ctx && enabled && ctx.state !== 'running') ctx.resume().catch(() => {});
   });
 
   for (const [event, pick] of Object.entries(TRIGGERS)) {
