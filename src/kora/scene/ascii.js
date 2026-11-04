@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/ascii.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/ascii.js con tools/kora/sync.mjs: no editar acá.
 // The ASCII renderer. Three passes over the scene render:
 //  1. cells: one fragment per character cell. Six sample circles (2 columns × 3 rows) give the cell's shape; the
 //     glyph whose ink covers the same circles is chosen (shape-aware, after Alex Harri). The cell also gets its colour
@@ -15,7 +15,7 @@ const TAG_FAR = TAG.far.toFixed(3), TAG_MOTE = TAG.mote.toFixed(3);
 
 // No space: even the darkest cells keep a dot, as in the references. The world uses the references' vocabulary;
 // Kora gets her own set of soft, curly glyphs so her coat reads as fur even when she is small.
-const WORLD = ".:-=+*o0#%&@/\\|_~^'";
+const WORLD = ".:-=+*o0#%&@/\\|_~^'\u2014";
 const FUR = ".,:;'\"~^*%&/\\";
 const GLYPHS = WORLD + FUR;
 const AT = WORLD.indexOf('@');
@@ -23,15 +23,15 @@ const AT = WORLD.indexOf('@');
 // references; only cells with a real edge inside go through the shape search. Order matches the world tags in common.js.
 const RAMPS = [
   '.:-=+*o#', // generic
-  '..://///', // grass (a share of '/' becomes '\\' per cell)
-  '.:--===#', // stone
-  '.:+*oo00', // foliage
+  '..::||||', // grass: the bright levels become / | \\ by the wind (cells pass)
+  '.:-\u2014==##', // stone and steps: — = #, as in the diorama skill
+  '.::*++oo', // foliage: . : * + o
   '.:||####', // lacquer and wood
   '..::oo00', // far: hills, Fuji, clouds
   '.-~~~~=~', // water
 ];
 const EDGE = [0.22, 0.42, 0.26, 0.32, 0.22, 9.0, 0.5];
-const SLASH = WORLD.indexOf('/'), BACK = WORLD.indexOf('\\'), STAR = WORLD.indexOf('*');
+const SLASH = WORLD.indexOf('/'), BACK = WORLD.indexOf('\\'), STAR = WORLD.indexOf('*'), BAR = WORLD.indexOf('|'), DASH = WORLD.indexOf('\u2014'), TILDE = WORLD.indexOf('~'), MINUS = WORLD.indexOf('-');
 const RAMP_IDX = RAMPS.flatMap((r) => [...r].map((ch) => WORLD.indexOf(ch)));
 const FONT = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
 
@@ -44,7 +44,8 @@ const CIRCLES = [
 const RADIUS = 0.2; // in cell widths
 
 function drawGlyph(ctx, ch, x, w, h) {
-  ctx.fillText(ch, x + w / 2, h * 0.54);
+  if (ch === '\u2014') ctx.fillRect(x, Math.round(h * 0.47), w, Math.max(1, Math.round(h * 0.11)));
+  else ctx.fillText(ch, x + w / 2, h * 0.54);
 }
 
 // Coverage of each glyph inside the six circles, measured on a large canvas, normalised by the overall maximum.
@@ -121,8 +122,15 @@ vec3 toDisplay(vec3 c) {
 const CELLS_FRAG = /* glsl */ `
 ${DISPLAY}
 uniform sampler2D tScene; uniform sampler2D tGlyph; uniform vec2 uRes; uniform vec2 uCell; uniform float uN; uniform float uExp; uniform float uAt;
-uniform float uGain; uniform float uWorldN; uniform float uRamp[56]; uniform float uEdge[7]; uniform float uKoraGain;
+uniform float uTime; uniform float uGain; uniform float uWorldN; uniform float uRamp[56]; uniform float uEdge[7]; uniform float uKoraGain;
 float hash2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float vn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash2(i), hash2(i + vec2(1, 0)), f.x), mix(hash2(i + vec2(0, 1)), hash2(i + vec2(1, 1)), f.x), f.y); }
+// an edge picks the stroke that runs along it: | \ — / by the angle of the brightness gradient (y up)
+float edgeGlyph(vec2 g) {
+  float a4 = mod(atan(g.y, g.x) + 0.3927, 3.14159) / 0.7854;
+  return a4 < 1.0 ? ${BAR}.0 : a4 < 2.0 ? ${BACK}.0 : a4 < 3.0 ? ${DASH}.0 : ${SLASH}.0;
+}
 void main() {
   vec2 o = floor(gl_FragCoord.xy) * uCell;
   float v[6]; vec3 sum = vec3(0.0); float wsum = 0.0; float tagMax = 0.0; float worldTag = 0.0; float farN = 0.0; float moteLum = -1.0; vec3 moteCol = vec3(0.0);
@@ -165,6 +173,8 @@ void main() {
   float m = max(max(max(v[0], v[1]), max(v[2], v[3])), max(v[4], v[5]));
   float mn = min(min(min(v[0], v[1]), min(v[2], v[3])), min(v[4], v[5]));
   float mean = (v[0] + v[1] + v[2] + v[3] + v[4] + v[5]) / 6.0;
+  // brightness gradient across the cell, before the contrast below: right minus left, top minus bottom
+  vec2 grad = vec2((v[1] + v[3] + v[5]) - (v[0] + v[2] + v[4]), ((v[0] + v[1]) - (v[4] + v[5])) * 1.5) / 3.0;
   // global contrast inside the cell sharpens the shape
   if (m > 1e-3) for (int k = 0; k < 6; k++) v[k] = pow(v[k] / m, uExp) * m;
   vec4 va = vec4(v[0], v[1], v[2], v[3]); vec2 vb = vec2(v[4], v[5]);
@@ -189,12 +199,24 @@ void main() {
   }
   if (cls > 0.5 && cls < 1.5) {
     int mat = int(clamp(floor((worldTag - 0.2) / 0.05 + 0.5), 0.0, 6.0));
-    if (m - mn < uEdge[mat]) {
-      float val = max(max(col.r, col.g), col.b) * 0.75 + mean * 0.5;
-      int lvl = int(clamp(val, 0.0, 0.999) * 8.0);
+    float val = max(max(col.r, col.g), col.b) * 0.75 + mean * 0.5;
+    int lvl = int(clamp(val, 0.0, 0.999) * 8.0);
+    // the breeze: slow gusts travel across the field (with the wind, so most blades lean '/'); slow enough not to strobe
+    vec2 cc = floor(gl_FragCoord.xy);
+    float w = vn(cc * vec2(0.045, 0.08) + vec2(-uTime * 0.22, uTime * 0.05)) * 2.0 - 1.0 + 0.28;
+    if (mat == 1) {
+      bi = uRamp[8 + lvl];
+      if (lvl >= 4) bi = w > 0.18 ? ${SLASH}.0 : w < -0.22 ? ${BACK}.0 : ${BAR}.0;
+    } else if (mat == 6) {
+      bi = uRamp[6 * 8 + lvl];
+      if (lvl >= 2 && lvl < 6) bi = w > 0.25 ? ${TILDE}.0 : ${MINUS}.0;
+    } else if (m - mn < uEdge[mat]) {
       bi = uRamp[mat * 8 + lvl];
-      if (mat == 1 && bi == ${SLASH}.0 && hash2(floor(gl_FragCoord.xy)) < 0.28) bi = ${BACK}.0;
+    } else if (mat == 0 || mat == 2 || mat == 4) {
+      // a real edge on stone, wood or lacquer: the stroke that runs along it
+      if (length(grad) > 0.06) bi = edgeGlyph(grad);
     }
+    if (mat == 2 && bi == ${DASH}.0 && hash2(cc) < 0.18) bi = ${WORLD.indexOf('=')}.0;
   }
   if (cls > 4.5) { bi = ${STAR}.0; col = moteCol; }  // a leaf or a firefly: one star in its own colour
   if (cls > 1.5 && cls < 2.5) col = mix(col, kCol, 0.6);  // Kora: lit from her brightest hairs
@@ -273,10 +295,23 @@ void main() {
 }`;
 
 const PRINT_FRAG = /* glsl */ `
-uniform sampler2D tA; uniform vec2 uRes; uniform float uT;
+uniform sampler2D tA; uniform vec2 uRes; uniform float uT; uniform vec4 uTilt;
 void main() {
   vec2 uv = gl_FragCoord.xy / uRes;
   vec3 c = texture2D(tA, uv).rgb;
+  // tilt-shift, as a model photographed close: a sharp band through Kora; above it (and a little below) the type
+  // melts into a soft painting on a golden-angle disc. uTilt: focus height, sharp half-band up, down, max radius (px)
+  float away = uv.y > uTilt.x ? (uv.y - uTilt.x - uTilt.y) / 0.42 : (uTilt.x - uTilt.z - uv.y) / 0.12;
+  float r = pow(clamp(away, 0.0, 1.0), 1.5) * uTilt.w * uRes.y / 1000.0;
+  if (r > 0.3) {
+    float lod = max(log2(r / 4.0), 0.0);
+    vec3 acc = vec3(0.0);
+    for (int i = 0; i < 32; i++) {
+      float t = float(i) + 0.5, a = t * 2.39996, rr = sqrt(t / 32.0) * r;
+      acc += textureLod(tA, uv + vec2(cos(a), sin(a)) * rr / uRes, lod).rgb;
+    }
+    c = acc / 32.0;
+  }
   // a little halation off anything bright
   vec3 glow = textureLod(tA, uv, 4.5).rgb;
   c += glow * glow * 0.09;
@@ -299,15 +334,15 @@ export function createAscii(renderer) {
     depthTest: false,
     depthWrite: false,
   }));
-  const common = {uExposure: {value: 1.25}, uSat: {value: 1.22}};
+  const common = {uExposure: {value: 1.25}, uSat: {value: 1.3}};
   const cells = quad(CELLS_FRAG, {
     ...common, tScene: {value: null}, tGlyph: {value: glyphTex}, uRes: {value: new THREE.Vector2()}, uCell: {value: new THREE.Vector2()},
-    uN: {value: GLYPHS.length}, uWorldN: {value: WORLD.length}, uRamp: {value: RAMP_IDX}, uEdge: {value: EDGE}, uKoraGain: {value: 1.05}, uExp: {value: 2.6}, uAt: {value: AT}, uGain: {value: 0.52},
+    uTime: {value: 0}, uN: {value: GLYPHS.length}, uWorldN: {value: WORLD.length}, uRamp: {value: RAMP_IDX}, uEdge: {value: EDGE}, uKoraGain: {value: 1.05}, uExp: {value: 2.6}, uAt: {value: AT}, uGain: {value: 0.52},
   });
   const compose = quad(COMPOSE_FRAG, {
     ...common, tCells: {value: null}, tAtlas: {value: null}, tScene: {value: null}, uCell: {value: new THREE.Vector2()}, uRes: {value: new THREE.Vector2()}, uRaw: {value: 0},
   });
-  const print = quad(PRINT_FRAG, {tA: {value: null}, uRes: {value: new THREE.Vector2()}, uT: {value: 0}});
+  const print = quad(PRINT_FRAG, {tA: {value: null}, uRes: {value: new THREE.Vector2()}, uT: {value: 0}, uTilt: {value: new THREE.Vector4(0.36, 0.28, 0.3, 13)}});
 
   let sceneRT, cellsRT, asciiRT, atlas, W = 0, H = 0, cw = 0, ch = 0;
   const state = {cssCell: 4.5, raw: false};
@@ -348,6 +383,7 @@ export function createAscii(renderer) {
     renderer.render(scene, camera);
 
     cells.material.uniforms.tScene.value = sceneRT.texture;
+    cells.material.uniforms.uTime.value = t;
     renderer.setRenderTarget(cellsRT);
     cells.render(renderer);
 

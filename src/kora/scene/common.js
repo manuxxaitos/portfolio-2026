@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/common.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/common.js con tools/kora/sync.mjs: no editar acá.
 // Shared pieces: the clock and wind every shader reads, the light rig, the material "tags" the ASCII pass uses to
 // treat sky, world, Kora and her eyes differently, and a small value noise for procedural colour.
 import * as THREE from 'three';

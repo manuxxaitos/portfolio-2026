@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/fur.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/fur.js con tools/kora/sync.mjs: no editar acá.
 // Shell fur: the skin mesh drawn N more times, each copy pushed out along the normal and cut into locks by a 3D
 // cell pattern, so the coat has volume and a soft, broken silhouette. Locks lean the way the coat is combed (flow),
 // sag, and swing with the breeze: the outer shells move most, so the whole coat ripples all the time.

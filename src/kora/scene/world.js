@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/world.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/world.js con tools/kora/sync.mjs: no editar acá.
 // The shrine: a stone path running from Kora back under a vermilion torii, steps up to a hall with a green copper roof,
 // stone lanterns, red maples and gold ginkgo, cypresses, and Fuji behind as a woodblock print draws it. The sky, the
 // sun, the moon, the clouds, the lanterns and the falling leaves (fireflies at night) follow the time of day (uDay).
@@ -84,7 +84,8 @@ function scatterGeo(template, items) {
       const o = (k * nv + i) * 3;
       v.set(tp[i * 3], tp[i * 3 + 1], tp[i * 3 + 2]).applyMatrix4(it.m);
       P[o] = v.x; P[o + 1] = v.y; P[o + 2] = v.z;
-      v.set(tn[i * 3], tn[i * 3 + 1], tn[i * 3 + 2]).applyMatrix3(nm).normalize();
+      if (it.n) v.copy(it.n);
+      else v.set(tn[i * 3], tn[i * 3 + 1], tn[i * 3 + 2]).applyMatrix3(nm).normalize();
       N[o] = v.x; N[o + 1] = v.y; N[o + 2] = v.z;
       C[o] = it.c.r; C[o + 1] = it.c.g; C[o + 2] = it.c.b;
     }
@@ -96,17 +97,28 @@ function scatterGeo(template, items) {
   g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(items.length * nv * 2), 2));
   return g;
 }
-const CLUMP = new THREE.IcosahedronGeometry(1, 0);
-// A canopy of many small faceted clumps, denser and darker inside, lumpy at the edge.
-function canopyItems(items, cx, cy, cz, rx, ry, rz, n, palette, size) {
+// A leaf card: a small diamond, folded a little along its midrib so it catches the light from both sides.
+const LEAF = (() => {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, -1, 0, 0.62, 0, 0.18, 0, 1, 0, 0, -1, 0, 0, 1, 0, -0.62, 0, 0.18]), 3));
+  g.computeVertexNormals();
+  return g;
+})();
+// Many leaf cards in a crown, as the diorama skill builds them: thick at the lit rim, sparse and dark inside, so the
+// glyphs see gaps between the leaves. Each card is lit with the crown's outward normal, so the crown shades as one volume.
+function crownCards(items, cx, cy, cz, rx, ry, rz, n, palette, size) {
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), p = new THREE.Vector3();
   for (let i = 0; i < n; i++) {
-    const u = rand() * Math.PI * 2, v = Math.acos(rr(-0.75, 1)), r = 0.45 + 0.55 * Math.sqrt(rand());
-    p.set(cx + Math.cos(u) * Math.sin(v) * rx * r, cy + Math.cos(v) * ry * r, cz + Math.sin(u) * Math.sin(v) * rz * r);
-    const k = size * rr(0.65, 1.2);
-    s.set(k, k * rr(0.7, 0.95), k);
+    const u = rand() * Math.PI * 2, v = Math.acos(rr(-0.7, 1)), r = Math.pow(rand(), 0.35);
+    // lumps on the crown's surface: a few big bumps of noise, so the silhouette is not an ellipsoid
+    const bump = 0.82 + 0.3 * vnoise(Math.cos(u) * 2.2 + cx, Math.cos(v) * 2.2, Math.sin(u) * 2.2 + cz);
+    const dx = Math.cos(u) * Math.sin(v), dy = Math.cos(v), dz = Math.sin(u) * Math.sin(v);
+    p.set(cx + dx * rx * r * bump, cy + dy * ry * r * bump, cz + dz * rz * r * bump);
+    const k = size * rr(0.7, 1.25);
+    s.set(k, k, k);
     q.setFromEuler(e.set(rand() * 6.3, rand() * 6.3, rand() * 6.3));
-    items.push({m: m.clone().compose(p, q, s), c: palette[Math.floor(rand() * palette.length)].clone().multiplyScalar((0.55 + 0.55 * r) * rr(0.85, 1.1))});
+    const nrm = new THREE.Vector3(dx, dy * 0.8 + 0.25, dz).normalize();
+    items.push({m: m.clone().compose(p, q, s), n: nrm, c: palette[Math.floor(rand() * palette.length)].clone().multiplyScalar((0.35 + 0.75 * r * r) * rr(0.85, 1.12))});
   }
 }
 // trunk plus a few branches reaching into the canopy
@@ -391,14 +403,14 @@ export function buildWorld(scene) {
   const maples = [[-7.8, -9.5, 1.0], [7.6, -10.5, 0.95], [9.5, -15, 1.1], [-6.8, -3.2, 0.8]];
   for (const [x, z, s] of maples) {
     trunks.push(...trunkGeos(x, groundY(x, z), z, 2.4 * s, 0.14 * s));
-    canopyItems(leafItems, x, groundY(x, z) + 2.9 * s, z, 1.9 * s, 1.05 * s, 1.7 * s, 340, WC.maple, 0.26 * s);
+    crownCards(leafItems, x, groundY(x, z) + 2.9 * s, z, 1.9 * s, 1.05 * s, 1.7 * s, 2600, WC.maple, 0.11 * s);
   }
   const ginkgos = [[-9.5, -5.0, 1.0], [8.8, -5.5, 0.95], [-11.5, -15, 1.1]];
   for (const [x, z, s] of ginkgos) {
     trunks.push(...trunkGeos(x, groundY(x, z), z, 3.0 * s, 0.16 * s));
-    canopyItems(leafItems, x, groundY(x, z) + 3.6 * s, z, 1.6 * s, 1.7 * s, 1.5 * s, 380, WC.ginkgo, 0.24 * s);
+    crownCards(leafItems, x, groundY(x, z) + 3.6 * s, z, 1.6 * s, 1.7 * s, 1.5 * s, 2800, WC.ginkgo, 0.1 * s);
   }
-  const leafMesh = new THREE.Mesh(scatterGeo(CLUMP, leafItems), mat({roughness: 0.8, flatShading: true}, {sway: 0.03, swayBase: 1.2, detail: 5}, TAG.foliage));
+  const leafMesh = new THREE.Mesh(scatterGeo(LEAF, leafItems), mat({roughness: 0.8, side: THREE.DoubleSide}, {sway: 0.03, swayBase: 1.2, detail: 5}, TAG.foliage));
   leafMesh.castShadow = true;
   scene.add(leafMesh);
   const trunkMesh = new THREE.Mesh(mergeGeometries(trunks), mat({roughness: 1}, {detail: 6}, TAG.wood));
@@ -422,11 +434,11 @@ export function buildWorld(scene) {
     } else {
       const pal = kind < 0.72 ? WC.maple : kind < 0.88 ? WC.ginkgo : WC.cypress;
       forestTrunks.push(...trunkGeos(x, y, z, 2.2 * s, 0.13 * s));
-      canopyItems(forestLeaves, x, y + 2.8 * s, z, 1.7 * s, 1.1 * s, 1.6 * s, 160, pal, 0.3 * s);
+      crownCards(forestLeaves, x, y + 2.8 * s, z, 1.7 * s, 1.1 * s, 1.6 * s, 1100, pal, 0.14 * s);
     }
   }
   scene.add(new THREE.Mesh(mergeGeometries(forest), mat({roughness: 0.85}, {sway: 0.02, swayBase: 1.0, detail: 5}, TAG.foliage)));
-  scene.add(new THREE.Mesh(scatterGeo(CLUMP, forestLeaves), mat({roughness: 0.85, flatShading: true}, {sway: 0.02, swayBase: 1.0, detail: 5}, TAG.foliage)));
+  scene.add(new THREE.Mesh(scatterGeo(LEAF, forestLeaves), mat({roughness: 0.85, side: THREE.DoubleSide}, {sway: 0.02, swayBase: 1.0, detail: 5}, TAG.foliage)));
   scene.add(new THREE.Mesh(mergeGeometries(forestTrunks), mat({roughness: 1}, {detail: 6}, TAG.wood)));
 
   // five-storey pagoda on the left, above the trees
@@ -610,11 +622,11 @@ export function buildWorld(scene) {
   }
   const AZALEA = [new THREE.Color('#e0558f'), new THREE.Color('#c93a6e'), new THREE.Color('#f07aa8'), new THREE.Color('#d8344a')];
   const bush = (x, z, s) => {
+    // a few mounds of small cards: dark leaves inside, blossoms thick on the outside
     for (let k = 0; k < 6; k++) {
-      const g = new THREE.IcosahedronGeometry(s * rr(0.14, 0.22), 1);
-      g.scale(1, 0.75, 1);
-      g.translate(x + rr(-0.25, 0.25) * s, groundY(x, z) + s * rr(0.12, 0.26), z + rr(-0.2, 0.2) * s);
-      bushes.push(colored(g, (rand() < 0.9 ? AZALEA[Math.floor(rand() * 4)] : WC.cypress[1]).clone().multiplyScalar(rr(0.85, 1.1))));
+      const r = s * rr(0.14, 0.22), cx = x + rr(-0.25, 0.25) * s, cy = groundY(x, z) + s * rr(0.12, 0.26), cz = z + rr(-0.2, 0.2) * s;
+      crownCards(bushes, cx, cy, cz, r, r * 0.75, r, 70, WC.cypress, r * 0.22);
+      crownCards(bushes, cx, cy + r * 0.05, cz, r * 1.05, r * 0.8, r * 1.05, 240, AZALEA, r * 0.15);
     }
   };
   for (const z of [3.4, -4.2]) for (const x of [-2.3, 2.3]) if (!inPond(x, z, 1.6)) bush(x + rr(-0.2, 0.2), z + rr(-0.3, 0.3), rr(1.0, 1.4));
@@ -622,7 +634,7 @@ export function buildWorld(scene) {
   const rockMesh = new THREE.Mesh(mergeGeometries(rocks), mat({roughness: 0.95}, {detail: 1}, TAG.stone));
   rockMesh.castShadow = true;
   scene.add(rockMesh);
-  const bushMesh = new THREE.Mesh(mergeGeometries(bushes), mat({roughness: 0.8}, {sway: 0.05, swayBase: 0, detail: 5}, TAG.foliage));
+  const bushMesh = new THREE.Mesh(scatterGeo(LEAF, bushes), mat({roughness: 0.8, side: THREE.DoubleSide}, {sway: 0.05, swayBase: 0, detail: 5}, TAG.foliage));
   bushMesh.castShadow = true;
   scene.add(bushMesh);
 

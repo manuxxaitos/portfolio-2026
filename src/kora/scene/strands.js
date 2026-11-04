@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/strands.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/strands.js con tools/kora/sync.mjs: no editar acá.
 // Instanced strands: one thin camera-facing ribbon per hair or grass blade, bent by gravity and a breeze that never
 // stops. Positions are given in the space of the object the strands are parented to, so fur follows the head when it
 // turns while the wind stays in world space. The constant small motion is what makes the ASCII glyphs flicker.

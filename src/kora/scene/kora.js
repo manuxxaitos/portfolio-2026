@@ -1,4 +1,4 @@
-// Copiado de exploraciones/kora-ascii/src/kora.js con tools/kora/sync.mjs: no editar acá.
+// Copiado de exploraciones/kora-diorama/src/kora.js con tools/kora/sync.mjs: no editar acá.
 // Kora: a ginger-and-white border collie mix, sitting. Built from smooth primitives with her markings painted into
 // vertex colours (white blaze, muzzle with freckles, chest ruff, socks, white tail tip), covered in shell fur and long
 // moving locks, with her two eyes: amber on her right, ice blue on her left. update() turns her head toward a target
