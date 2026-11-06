@@ -22,18 +22,19 @@ function pegar(dir, salida, vf) {
 }
 
 // ukiyo: un paso por los cinco grabados, del otoño a la nieve. Cada tramo arranca cuando pasa algo: seg es a qué segundo de
-// esa parada empieza. El recorte saca el borde de papel y deja 16:10.
+// esa parada empieza, sin tocar nada (a los 20 s el viento hace lo suyo). El recorte saca el borde de papel y deja 16:10; y es
+// su altura, propia de cada estampa: el lago sube para no cortar la punta del Fuji.
 const TRAMOS = [
-  {ep: 0, seg: 20.5}, // la carta se va con el viento
-  {ep: 1, seg: 2}, // cae en el lago
-  {ep: 2, seg: 8},
-  {ep: 3, seg: 15}, // los paraguas en el puente
-  {ep: 4, seg: 10}, // la nieve y el paraguas rojo
+  {ep: 0, seg: 20.5, y: 0.12}, // la carta se va con el viento
+  {ep: 1, seg: 3.8, y: 0.083}, // cae en el lago
+  {ep: 2, seg: 23.6, y: 0.133}, // de la rama al monje
+  {ep: 3, seg: 24, y: 0.12}, // de los paraguas a la nena
+  {ep: 4, seg: 21, y: 0.12}, // baja a la mano de ella
 ];
 const DURA = 2.6, FUNDE = 0.6;
 if (pide('ukiyo')) {
   const clips = [];
-  for (const {ep, seg} of TRAMOS) {
+  for (const {ep, seg, y} of TRAMOS) {
     const p = await abrir(b, path.join(ex, 'ukiyo-mac/dist/index.html'));
     await p.waitForFunction(() => window.KAZE && window.KAZE.ready, null, {timeout: 30000});
     await p.addStyleTag({content: '#subs, #card { visibility: hidden !important; }'});
@@ -53,7 +54,7 @@ if (pide('ukiyo')) {
       await p.screenshot({path: path.join(dir, `f${String(i).padStart(4, '0')}.jpg`), type: 'jpeg', quality: 94, clip});
     }
     const salida = path.join(src, `ukiyo-${ep}.mp4`);
-    pegar(dir, salida, 'crop=iw*0.86:iw*0.86*10/16:iw*0.07:ih*0.05');
+    pegar(dir, salida, `crop=iw*0.782:iw*0.782*10/16:iw*0.108:ih*${y}`);
     fs.rmSync(dir, {recursive: true, force: true});
     clips.push(salida);
     console.log(`ukiyo ${ep}`, JSON.stringify(clip), p.errores.slice(0, 2));
