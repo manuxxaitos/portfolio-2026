@@ -349,9 +349,12 @@ export function buddy() {
       follow();
       clear('idle');
       timers.idle = window.setTimeout(idle, IDLE);
-      if (first)
-        // saludo según la hora, apenas se mueve el puntero (sin sonido)
-        window.setTimeout(() => !shown && !target && !win && selfSay(greeting()), 600);
+      if (first) {
+        // saludo según la hora, apenas se mueve el puntero (sin sonido); durante la entrada espera a que termine
+        const hello = () => window.setTimeout(() => !shown && !target && !win && selfSay(greeting()), 600);
+        if (document.documentElement.classList.contains('intro-on')) document.addEventListener('intro:end', hello, { once: true });
+        else hello();
+      }
     },
     { passive: true },
   );

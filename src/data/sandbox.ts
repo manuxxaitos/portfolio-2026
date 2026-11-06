@@ -39,7 +39,7 @@ export const sandbox: Exploration[] = [
     slug: 'kora',
     title: 'Kora',
     what: 'Diorama 3D en ASCII',
-    line: 'La estampilla de arriba, entera y en su propia página.',
+    line: 'Kora frente al Fuji: una escena 3D en vivo, impresa en ASCII.',
     hover: 'Kora te sigue con la mirada',
     capture: capture('kora', 'Kora frente al santuario, en ASCII, del día a la noche'),
   },

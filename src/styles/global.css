@@ -269,7 +269,7 @@ h3 {
   transform: translateY(2px);
 }
 
-/* campos ASCII (el lugar de Kora, el contacto y el 404) */
+/* campos ASCII (el contacto y el 404) */
 canvas[data-plotter] {
   position: absolute;
   inset: 0;

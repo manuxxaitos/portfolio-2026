@@ -5,6 +5,24 @@ import avatar from '../assets/me/avatar.jpg';
 const email = 'tomascardozo98@gmail.com';
 ---
 
+<!-- Antes de pintar: si esta visita tiene entrada (scripts/intro.ts). Si ese script no llega, la página aparece igual -->
+<script is:inline>
+  (function () {
+    var nav = performance.getEntriesByType('navigation')[0];
+    var below = 0;
+    try {
+      below = Number(sessionStorage.getItem('intro-y'));
+    } catch (e) {}
+    if (location.hash || below > 120 || (nav && nav.type === 'back_forward')) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var html = document.documentElement;
+    html.classList.add('intro-on');
+    setTimeout(function () {
+      if (!html.classList.contains('intro-run')) html.classList.remove('intro-on');
+    }, 5000);
+  })();
+</script>
+
 <section class="intro col" aria-labelledby="intro-title">
   <h1 id="intro-title" class="intro__hi">
     Soy <strong>Tomás</strong><span class="sr-only">,</span>
@@ -80,5 +98,44 @@ const email = 'tomascardozo98@gmail.com';
   }
   .intro__face:hover {
     transform: rotate(6deg) scale(1.08);
+  }
+</style>
+
+<style is:global>
+  /* cada palabra de la entrada (se quedan así después, para que nada salte de renglón) */
+  .intro .iw {
+    display: inline-block;
+  }
+
+  /* la entrada: solo la presentación, centrada, y sin poder moverse hasta que sube */
+  html.intro-on:not(.intro-go) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+  }
+  html.intro-on:not(.intro-play):not(.intro-go) .intro {
+    visibility: hidden;
+  }
+  html.intro-on:not(.intro-go) .intro,
+  html.intro-on:not(.intro-go) #sandbox {
+    transform: translateY(var(--intro-y, 0));
+  }
+  html.intro-on:not(.intro-go) main > :not(.intro),
+  html.intro-on:not(.intro-go) .snd,
+  html.intro-on:not(.intro-go) .buddy {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* sube, y lo demás llega detrás con la misma curva: LIFT en scripts/intro.ts */
+  html.intro-go .intro {
+    transition: transform 1.5s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  html.intro-go main > #sandbox,
+  html.intro-go main > :not(.intro),
+  html.intro-go .snd,
+  html.intro-go .buddy {
+    transition:
+      opacity 1s var(--ease-out) 0.2s,
+      transform 1.5s cubic-bezier(0.32, 0.72, 0, 1);
   }
 </style>

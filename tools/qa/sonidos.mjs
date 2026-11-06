@@ -10,7 +10,7 @@ const req = createRequire(path.join(process.env.HOME, '.claude/skills/teardown/n
 const {chromium} = req('playwright');
 const dev = process.env.DEV || 'http://127.0.0.1:4322/';
 /** cuántos dB sobre la burbuja va cada familia */
-const ABOVE = {burbuja: 0, cambio: 4, accion: 7, resultado: 9};
+const ABOVE = {burbuja: 0, cambio: 4, accion: 7, resultado: 9, entrada: 4};
 
 const b = await chromium.launch({channel: 'chrome'});
 const p = await b.newPage();

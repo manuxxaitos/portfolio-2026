@@ -5,13 +5,14 @@
  *  1. burbuja   La burbuja aparece, o pasa a otra cosa de la página, porque moviste el puntero hacia algo: un pop
  *               de gel bajito (como mucho uno cada 0,35 s). Encadenar frases, hablar sola o llegar con una ventana no suena.
  *  2. cambio    Cambiaste un valor: el color de una marca 3D, qué tarjeta va adelante. Una gota. Si no
- *               cambió nada, no suena. El slider de día y noche, en cambio, hace clic en cada muesca que
- *               cruzás, como una rueda de selección: un tic seco y cortito que no corta ni espera a nadie.
+ *               cambió nada, no suena.
  *  3. acción    Algo se abre o se agranda (soplido que sube), se cierra o se achica (toque que baja), o
- *               tocaste algo vivo: Kora, la llama de Kench, el logo de AISH (rebote).
+ *               tocaste algo vivo: la llama de Kench, el logo de AISH (rebote).
  *  4. resultado El mensaje sale (clic acuoso) y llega la respuesta (pop redondo), el mail se copió (dos
  *               notas que suben) o falta algo (toque grave, siempre junto a una señal visual).
- * Nada suena al scrollear, al mover el mouse, al arrastrar (salvo las muescas del slider), por animaciones ni por links que salen del sitio.
+ * Aparte, la entrada de la portada (scripts/intro.ts): una nota de vidrio por frase, que juntas forman un acorde abierto que
+ * sube, y aire que se abre cuando el texto sube. Es lo único que suena por una animación.
+ * Nada más suena al scrollear, al mover el mouse, al arrastrar, por animaciones ni por links que salen del sitio.
  *
  * Tiempos: cada cosa suena siempre que pasa y, si se repite rápido, el sonido vuelve a empezar. Nunca suenan
  * dos a la vez: lo nuevo corta a lo anterior, salvo el pop de la burbuja, que no corta nada (si algo está
@@ -19,7 +20,8 @@
  *
  * Los efectos se sintetizan con Web Audio (nada grabado ni copiado), con ataques redondeados y colas cortas.
  * El sonido viene prendido; el botón del rincón (SoundToggle.astro) lo apaga y guarda la preferencia. Igual
- * no suena nada hasta el primer clic o tecla: el navegador no deja arrancar el audio antes.
+ * no suena nada hasta el primer clic o tecla: el navegador no deja arrancar el audio antes. La entrada prueba igual (wake), y
+ * suena solo si el navegador la deja; en una primera visita, casi nunca.
  * Con la pestaña oculta el audio se suspende. Las demás partes de la página solo avisan qué pasó, con
  * eventos en document (TRIGGERS, abajo).
  */
@@ -33,7 +35,7 @@ import { emit } from './events';
 const MASTER = 0.7;
 const PREF_KEY = 'sonido';
 
-type Family = 'burbuja' | 'cambio' | 'accion' | 'resultado';
+type Family = 'burbuja' | 'cambio' | 'accion' | 'resultado' | 'entrada';
 interface Voice {
   ctx: AudioContext;
   out: GainNode;
@@ -47,6 +49,8 @@ interface Fx {
   ms: number;
   /** cuánto va al reverb corto */
   wet?: number;
+  /** va por su cuenta: no corta a nadie ni lo cortan */
+  free?: boolean;
   play: (v: Voice) => void;
 }
 
@@ -125,6 +129,7 @@ function hiss(v: Voice, o: HissOpts) {
   const t = v.t + (o.at ?? 0);
   const src = ctx.createBufferSource();
   src.buffer = noise(ctx);
+  src.loop = true;
   const f = ctx.createBiquadFilter();
   f.type = o.filter ?? 'bandpass';
   f.Q.value = o.q ?? 1;
@@ -147,6 +152,13 @@ const warm = (v: Voice, at: number, f: number) => {
   tone(v, { f: f * 2, at, peak: 0.08, attack: 0.012, tau: 0.03 });
 };
 
+// una nota de vidrio, lejana: ataque blando, cola larga y dos parciales muy bajos
+const glass = (v: Voice, f: number) => {
+  tone(v, { f, peak: 0.5, attack: 0.03, tau: 0.42 });
+  tone(v, { f: f * 2, peak: 0.07, attack: 0.03, tau: 0.22 });
+  tone(v, { f: f * 3.01, peak: 0.02, attack: 0.02, tau: 0.1 });
+};
+
 export const SOUNDS = {
   /* 1. burbuja ------------------------------------------------------- */
 
@@ -162,24 +174,13 @@ export const SOUNDS = {
   },
   /* 2. cambio -------------------------------------------------------- */
 
-  /** cambiaste un valor (color, hora, tarjeta de adelante): gota sutil */
+  /** cambiaste un valor (color, tarjeta de adelante): gota sutil */
   drop: {
     family: 'cambio',
     vol: 0.09,
     ms: 180,
     play: (v) => {
       tone(v, { f: 780, to: 1500, glide: 0.045, peak: 0.5, attack: 0.004, tau: 0.03 });
-    },
-  },
-
-  /** el slider cruza una muesca: un tic mecánico, seco, como la rueda de un selector */
-  tick: {
-    family: 'cambio',
-    vol: 0.07,
-    ms: 0,
-    play: (v) => {
-      hiss(v, { filter: 'bandpass', f: 3400, q: 3.5, peak: 0.9, attack: 0.0008, tau: 0.0035, end: 0.025 });
-      tone(v, { f: 1650, peak: 0.35, attack: 0.0008, tau: 0.005 });
     },
   },
 
@@ -215,7 +216,7 @@ export const SOUNDS = {
       hiss(v, { filter: 'lowpass', f: 900, q: 0.7, peak: 0.25, attack: 0.002, tau: 0.012, end: 0.06 });
     },
   },
-  /** tocaste algo vivo (Kora, la llama de Kench, el logo de AISH): rebote elástico */
+  /** tocaste algo vivo (la llama de Kench, el logo de AISH): rebote elástico */
   boing: {
     family: 'accion',
     vol: 0.085,
@@ -276,6 +277,25 @@ export const SOUNDS = {
       tone(v, { f: 440, to: 360, glide: 0.12, peak: 0.08, attack: 0.012, tau: 0.03 });
     },
   },
+
+  /* entrada ---------------------------------------------------------- */
+
+  /** cada frase de la entrada: sol, re y la, un acorde abierto que sube */
+  nota1: { family: 'entrada', vol: 0.04, ms: 2600, wet: 0.7, free: true, play: (v) => glass(v, 392) },
+  nota2: { family: 'entrada', vol: 0.04, ms: 2600, wet: 0.7, free: true, play: (v) => glass(v, 587.33) },
+  nota3: { family: 'entrada', vol: 0.04, ms: 2600, wet: 0.7, free: true, play: (v) => glass(v, 880) },
+  /** el texto sube y llega el resto: aire que se abre, con un grave que apenas se oye */
+  subida: {
+    family: 'entrada',
+    vol: 0.05,
+    ms: 1700,
+    wet: 0.4,
+    free: true,
+    play: (v) => {
+      hiss(v, { f: 500, to: 2200, glide: 1, q: 0.7, peak: 0.8, attack: 0.4, tau: 0.25, end: 1.7 });
+      tone(v, { f: 196, to: 294, glide: 0.9, peak: 0.25, attack: 0.35, tau: 0.3 });
+    },
+  },
 } satisfies Record<string, Fx>;
 
 export type SoundName = keyof typeof SOUNDS;
@@ -289,13 +309,11 @@ const TRIGGERS: Record<string, SoundName | ((e: CustomEvent) => SoundName | null
   'buddy:open': 'pop',
   // 2. cambio: un valor distinto (los componentes avisan solo si cambió)
   'toy:color': 'drop',
-  'sky:tick': 'tick',
   'tilt:front': 'drop',
   // 3. acción: abrir (no si la ventana ya llega abierta desde el ancla), cerrar, agrandar o achicar, tocar
   'win:open': (e) => (e.detail?.how === 'instant' ? null : 'open'),
   'win:closing': 'close',
   'win:zoom': (e) => (e.detail ? 'open' : 'close'),
-  'kora:poke': 'boing',
   'toy:poke': 'boing',
   // 4. resultado
   'chat:send': 'send',
@@ -346,6 +364,26 @@ function ensure() {
   return ctx;
 }
 
+/** una voz nueva, con su volumen y su parte de reverb, que se suelta sola al terminar */
+function voice(c: AudioContext, fx: Fx) {
+  const out = c.createGain();
+  out.gain.value = fx.vol;
+  out.connect(master);
+  if (fx.wet) {
+    const send = c.createGain();
+    send.gain.value = fx.wet;
+    out.connect(send).connect(wetBus);
+  }
+  fx.play({ ctx: c, out, t: c.currentTime + 0.004 });
+  setTimeout(() => out.disconnect(), fx.ms + 700);
+  return out;
+}
+
+/** la entrada prueba arrancar el audio sin un gesto: si el navegador deja, suena; si no, sigue muda hasta el primer clic */
+export function wake() {
+  if (enabled) ensure().resume().catch(() => {});
+}
+
 /** suena si corresponde; devuelve si sonó */
 // si el audio todavía está despertando (pasa justo en el primer clic), el sonido espera y sale apenas arranca
 let waiting: { name: SoundName; at: number } | null = null;
@@ -364,13 +402,8 @@ export function play(name: SoundName): boolean {
     return false;
   }
   const fx: Fx = SOUNDS[name];
-  // el tic de una muesca es tan corto que va por su cuenta: no corta ni lo cortan
-  if (name === 'tick') {
-    const out = ctx.createGain();
-    out.gain.value = fx.vol;
-    out.connect(master);
-    fx.play({ ctx, out, t: ctx.currentTime + 0.002 });
-    setTimeout(() => out.disconnect(), 200);
+  if (fx.free) {
+    voice(ctx, fx);
     if (import.meta.env.DEV) ((window as unknown as { __sonidos?: string[] }).__sonidos ??= []).push(name);
     return true;
   }
@@ -380,17 +413,7 @@ export function play(name: SoundName): boolean {
   if (fx.family === 'burbuja' && busy) return false;
   // lo demás corta lo que esté sonando (también a sí mismo, si se repite rápido)
   if (busy) current!.out.gain.setTargetAtTime(0, ctx.currentTime, 0.008);
-  const out = ctx.createGain();
-  out.gain.value = fx.vol;
-  out.connect(master);
-  if (fx.wet) {
-    const send = ctx.createGain();
-    send.gain.value = fx.wet;
-    out.connect(send).connect(wetBus);
-  }
-  fx.play({ ctx, out, t: ctx.currentTime + 0.004 });
-  current = { out, until: now + fx.ms };
-  setTimeout(() => out.disconnect(), fx.ms + 700);
+  current = { out: voice(ctx, fx), until: now + fx.ms };
   // en desarrollo queda registro de lo que sonó, para probar los disparadores
   if (import.meta.env.DEV) ((window as unknown as { __sonidos?: string[] }).__sonidos ??= []).push(name);
   return true;

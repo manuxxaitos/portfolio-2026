@@ -2,6 +2,7 @@ import Lenis from 'lenis';
 import { Plotter } from './ascii';
 import { compose, windows } from './windows';
 import { buddy } from './buddy';
+import { intro } from './intro';
 import { emit } from './events';
 import { sound } from './sound';
 
@@ -17,6 +18,7 @@ export function boot() {
   const lenis = smoothScroll();
   revealOnScroll();
   lazyVideos();
+  intro(lenis); // después de los dos anteriores: miden la página en su lugar, sin la entrada
   copyButtons();
   buddy(); // antes que las ventanas: escucha win:open
   windows(lenis);
@@ -128,8 +130,7 @@ function copyButtons() {
 /* ------------------------------------------------------------------ */
 
 /**
- * Campos ASCII: curvas de nivel suaves en el lugar de Kora y detrás del
- * contacto; la curva bajo el cursor se enciende. Sin WebGL queda el papel liso.
+ * Campos ASCII: curvas de nivel suaves detrás del contacto; la curva bajo el cursor se enciende. Sin WebGL queda el papel liso.
  */
 function plotters() {
   const canvases = [...document.querySelectorAll<HTMLCanvasElement>('canvas[data-plotter]')];
