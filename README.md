@@ -62,7 +62,7 @@ Los datos de los textos salen de los repos, READMEs y notas de cada proyecto.
 ## Actualizar una pieza del sandbox
 
 1. Reconstruí la pieza en `../exploraciones/<carpeta>`.
-2. Corré `node tools/sandbox/sync.mjs` para traerla a `public/sandbox/`.
+2. Corré `node tools/sandbox/sync.mjs <slug>` para traerla a `public/sandbox/`. Sin slug trae las cuatro, también las que sigan a medio hacer.
 3. Si cambió cómo se ve, volvé a sacar la captura y procesala:
 
 ```sh

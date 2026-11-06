@@ -1,7 +1,8 @@
 // Trae las piezas del sandbox desde exploraciones/, que es donde se hacen y se editan: cada dist/ es una página suelta y
 // acá queda en public/sandbox/<slug>/, con su propio link. Le agrega a la copia lo que hace falta para compartir ese link
 // (canónica, descripción y vista previa), sin tocar el original. Correr después de reconstruir una pieza allá:
-//   node tools/sandbox/sync.mjs
+//   node tools/sandbox/sync.mjs                 todas
+//   node tools/sandbox/sync.mjs lopez-vivo      solo esa, para no traer una pieza que sigue a medio hacer
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -16,8 +17,12 @@ const piezas = [
   {slug: 'lopez-itapiru', src: 'lopez-itapiru/dist/index.html', desc: 'Un óleo vivo según Cándido López: la llegada del Ejército Aliado a Itapirú, con sus batallones, los barcos, el río, el sonido y la noche de la marcha.'},
 ];
 
+const pedidas = process.argv.slice(2);
+const desconocida = pedidas.find((slug) => !piezas.some((p) => p.slug === slug));
+if (desconocida) throw new Error(`No hay ninguna pieza ${desconocida}`);
+
 const attr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-for (const {slug, src, desc} of piezas) {
+for (const {slug, src, desc} of piezas.filter((p) => !pedidas.length || pedidas.includes(p.slug))) {
   let html = fs.readFileSync(path.join(from, src), 'utf8');
   const title = html.match(/<title>([^<]*)<\/title>/)?.[1];
   if (!title) throw new Error(`${src} no tiene <title>`);
