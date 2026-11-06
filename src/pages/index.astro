@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Intro from '../components/Intro.astro';
 import KoraStamp from '../components/KoraStamp.astro';
+import Sandbox from '../components/Sandbox.astro';
 import Projects from '../components/Projects.astro';
 import Tools from '../components/Tools.astro';
 import Contact from '../components/Contact.astro';
@@ -11,6 +12,7 @@ import { featured, others } from '../data/projects';
 <Base>
   <Intro />
   <KoraStamp />
+  <Sandbox />
   <Projects featured={featured} others={others} />
   <Tools />
   <Contact />

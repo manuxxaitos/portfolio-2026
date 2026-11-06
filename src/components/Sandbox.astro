@@ -1,0 +1,191 @@
+---
+/**
+ * Sandbox: exploraciones personales, antes de los proyectos. Cada una es una ventanita con su dirección en la barra y
+ * una captura breve en loop; entrar lleva a la pieza viva, en su propio link (se abre aparte, como los sitios).
+ */
+import Arrow from './Arrow.astro';
+import Media from './Media.astro';
+import SectionHead from './SectionHead.astro';
+import { sandbox } from '../data/sandbox';
+---
+
+<section
+  id="sandbox"
+  class="col sec"
+  aria-labelledby="sandbox-t"
+  data-ambient={JSON.stringify(['Están vivas: entrá y tocá', 'Esto lo hago por curiosidad'])}
+>
+  <SectionHead n={1} id="sandbox-t" title="Sandbox" />
+  <p class="lead">Lo que hago por curiosidad, sin cliente. Cada pieza está viva y tiene su propio link.</p>
+  <ul class="grid">
+    {
+      sandbox.map((s) => (
+        <li class:list={['item', s.wide && 'item--wide']} data-reveal>
+          <a class="link" href={`/sandbox/${s.slug}/`} target="_blank" rel="noopener" data-say={s.hover}>
+            <div class="win">
+              <div class="bar titlebar" aria-hidden="true">
+                <span class="lights">
+                  <i class="light light--close" />
+                  <i class="light light--min" />
+                  <i class="light light--zoom" />
+                </span>
+                <span class="addr titlebar__title">
+                  <span class="addr__host">tomascardozo.com</span>/sandbox/{s.slug}
+                </span>
+              </div>
+              <div class="shot" style={`aspect-ratio:${s.capture.ratio}`}>
+                <Media item={s.capture} fit="cover" />
+              </div>
+            </div>
+            <div class="cap">
+              <h3 class="title">
+                {s.title}
+                <Arrow dir="up-right" class="ext" />
+              </h3>
+              <span class="what">{s.what}</span>
+            </div>
+            <p class="line">{s.line}</p>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .lead {
+    margin-top: -8px;
+    margin-bottom: 26px;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 40px 20px;
+  }
+  .item--wide {
+    grid-column: 1 / -1;
+  }
+  .link {
+    display: block;
+    text-decoration: none;
+  }
+
+  /* la ventana: la misma barra Aqua de las galerías, sin vidrio para que el video se vea limpio */
+  .win {
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow:
+      0 0 0 0.5px rgb(18 19 20 / 0.16),
+      0 8px 20px -12px rgb(18 19 20 / 0.28),
+      0 28px 60px -32px rgb(18 19 20 / 0.4);
+    transition:
+      transform 0.6s var(--spring),
+      box-shadow 0.4s var(--ease-out);
+  }
+  .link:hover .win {
+    transform: translateY(-3px);
+    box-shadow:
+      0 0 0 0.5px rgb(18 19 20 / 0.2),
+      0 12px 26px -12px rgb(18 19 20 / 0.34),
+      0 40px 80px -32px rgb(18 19 20 / 0.5);
+  }
+  .link:focus-visible .win {
+    outline: 2px solid var(--signal);
+    outline-offset: 3px;
+  }
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
+    height: 30px;
+    padding: 0 10px;
+  }
+  .bar .lights {
+    gap: 6px;
+  }
+  .bar .light {
+    width: 11px;
+    height: 11px;
+  }
+  .addr {
+    overflow: hidden;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .addr__host {
+    color: var(--ink-3);
+  }
+  .shot {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+  .shot :global(.media--cover) {
+    transition: transform 1.2s var(--ease-out);
+  }
+  .link:hover .shot :global(.media--cover) {
+    transform: scale(1.02);
+  }
+
+  .cap {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--f-sans);
+    font-size: 1rem;
+    font-weight: 560;
+    letter-spacing: -0.01em;
+  }
+  .title :global(.ext) {
+    flex: none;
+    width: 11px;
+    height: 11px;
+    color: var(--ink-3);
+    transition: transform 0.35s var(--spring);
+  }
+  .link:hover :global(.ext) {
+    transform: translate(2px, -2px);
+    color: var(--signal);
+  }
+  .what {
+    flex: none;
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .line {
+    margin-top: 4px;
+    color: var(--ink-3);
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .win,
+    .shot :global(.media--cover),
+    .title :global(.ext) {
+      transition: none;
+    }
+    .link:hover .win,
+    .link:hover .shot :global(.media--cover) {
+      transform: none;
+    }
+  }
+</style>

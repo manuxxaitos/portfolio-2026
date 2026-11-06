@@ -473,6 +473,42 @@
    "crf_av1": 40,
    "poster_at": 1,
    "crop": "1920:1080:0:0"
+  },
+  {
+   "src": "tools/sandbox/src/ukiyo.mp4",
+   "out": "sandbox/ukiyo",
+   "fps": 30,
+   "w": 1280,
+   "crf": 26,
+   "crf_av1": 40,
+   "poster_at": 3.6
+  },
+  {
+   "src": "tools/sandbox/src/kora.mp4",
+   "out": "sandbox/kora",
+   "fps": 30,
+   "w": 800,
+   "crf": 25,
+   "crf_av1": 42,
+   "poster_at": 2.2
+  },
+  {
+   "src": "tools/sandbox/src/lopez-vivo.mp4",
+   "out": "sandbox/lopez-vivo",
+   "fps": 30,
+   "w": 900,
+   "crf": 21,
+   "crf_av1": 32,
+   "poster_at": 1.5
+  },
+  {
+   "src": "tools/sandbox/src/lopez-itapiru.mp4",
+   "out": "sandbox/lopez-itapiru",
+   "fps": 30,
+   "w": 1280,
+   "crf": 23,
+   "crf_av1": 34,
+   "poster_at": 2
   }
  ]
 }

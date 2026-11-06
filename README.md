@@ -1,6 +1,6 @@
 # Portfolio 2026 — Tomás Cardozo, diseñador
 
-Una sola página en Astro, en una columna, con el tono de una carta: presentación en primera persona, Kora impresa como estampilla (una escena 3D en vivo dibujada en ASCII, con el slider de la hora del día), proyectos en tarjetas, una lista con el resto, herramientas y contacto. No hay páginas por proyecto. Los que son sitios llevan directo al sitio; el resto abre una ventana sobre la página con su galería. Una burbuja de gel verde menta acompaña al cursor y dice frases cortas: saluda según la hora, avisa qué pasa al hacer clic, cuenta cada proyecto dentro de su ventana y nombra las piezas. Ventanas, burbuja y contacto usan una estética macOS retrofuturista: vidrio esmerilado, gel Aqua, semáforos y microinteracciones. Tipografía Inter y scroll con inercia (Lenis). No hay frameworks de UI ni librerías de animación.
+Una sola página en Astro, en una columna, con el tono de una carta: presentación en primera persona, Kora impresa como estampilla (una escena 3D en vivo dibujada en ASCII, con el slider de la hora del día), el sandbox con las exploraciones personales, proyectos en tarjetas, una lista con el resto, herramientas y contacto. No hay páginas por proyecto. Los que son sitios llevan directo al sitio; el resto abre una ventana sobre la página con su galería. Las piezas del sandbox son la excepción: cada una vive entera en su propio link. Una burbuja de gel verde menta acompaña al cursor y dice frases cortas: saluda según la hora, avisa qué pasa al hacer clic, cuenta cada proyecto dentro de su ventana y nombra las piezas. Ventanas, burbuja y contacto usan una estética macOS retrofuturista: vidrio esmerilado, gel Aqua, semáforos y microinteracciones. Tipografía Inter y scroll con inercia (Lenis). No hay frameworks de UI ni librerías de animación.
 
 ## Comandos
 
@@ -19,7 +19,9 @@ Requiere Node 22 o superior.
 |---|---|
 | `src/data/projects.ts` | Todos los proyectos: textos, medios y orden. `featured` define las tarjetas (el resto va a «Más proyectos»). Con `gallery` o `groups` la tarjeta abre una ventana; sin eso, lleva a `url`. `says` son las frases de la burbuja dentro de la ventana, `hover` lo que dice sobre la tarjeta y `note` una aclaración visible para todos. |
 | `src/data/types.ts` | La forma de un proyecto. |
-| `src/pages/index.astro` | La página: Intro, KoraStamp, Proyectos, Herramientas y Contacto. |
+| `src/pages/index.astro` | La página: Intro, KoraStamp, Sandbox, Proyectos, Herramientas y Contacto. |
+| `src/data/sandbox.ts` + `src/components/Sandbox.astro` | El sandbox: exploraciones personales, antes de los proyectos. Cada una es una ventanita Aqua con su dirección en la barra y una captura breve en loop; `wide` la lleva a todo el ancho. Entrar abre la pieza en su propio link, en otra pestaña, como los sitios. |
+| `public/sandbox/<slug>/` | Las piezas enteras, una página suelta cada una. Son copias: se editan en `../exploraciones` y se traen con `tools/sandbox/sync.mjs`. |
 | `src/components/Soportes.astro` | Las piezas de redes en el soporte donde se usaron (historias y pantallas de app en teléfonos, páginas web que se recorren al pasar, placas en pantallas de transmisión, posteos, encabezados de perfil y un perfil con su grilla) sobre el color de cada equipo, derechas y sin inclinar: lo usan los grupos de E-sports y de Realit. (`stage` en `projects.ts`). |
 | `src/components/Contact.astro` | El contacto como una conversación de Mensajes: quién habla va en la barra (una sola foto), los globos son todos del mismo tamaño de letra, se agrupan y miden lo que su texto; la charla de entrada aparece en orden (puntitos, globo) sin mover nada, y la burbuja del cursor se corre mientras estás adentro (`data-buddy-off`). |
 | `src/components/KoraStamp.astro` | Kora como estampilla (560 px de ancho, todo escala con `--sw`): póster, ventana con la escena en vivo, leyenda, perforaciones (máscaras CSS) y el slider de día a noche. La escena se carga después de la primera pintura, solo si se acerca a la pantalla y si hay WebGL. Incluye «Cargando» (una barra Aqua) que tapa la página hasta que Kora dibuja, máximo 4 s; Kora dibuja a 60 cuadros mientras la movés y a 30 quieta o mientras scrolleás. |
@@ -43,6 +45,7 @@ Requiere Node 22 o superior.
 | `_versiones/v2-con-paginas/` | La versión anterior, con una página por proyecto, hero, perfil y retrato ASCII. No entra en el build. |
 | `tools/esports/` | Script que bajó las piezas de e-sports desde Behance. |
 | `tools/kora/sync.mjs` | Copia la escena de Kora y sus tipografías desde la exploración. |
+| `tools/sandbox/` | `sync.mjs` copia las piezas desde `../exploraciones` y les suma canónica, descripción y vista previa para compartir el link. `grabar.mjs` graba ukiyo y Kora cuadro por cuadro (`reloj.mjs`) y `lopez.mjs` corta los dos López de sus películas; `ciclo.mjs` funde el final con el principio para que el loop no salte. |
 | `_versiones/` | Versión 1 del sitio y componentes descartados, por si hace falta recuperar algo. No entra en el build. |
 | `src/components/CoverStack.astro` + `src/tapas/ring.js` | El anillo 3D de tapas (three.js) del proyecto Tapas de discos: tapas como placas de vidrio y un lente en los costados. Vive solo en la galería (gira solo, se arrastra, al tocar una tapa la trae adelante y la burbuja nombra la que apuntás); en la tarjeta de la página es una foto fija (`tapas/anillo.jpg`), para no sumar otro 3D a la página. |
 
@@ -55,6 +58,20 @@ Requiere Node 22 o superior.
 3. Agregá el proyecto en `src/data/projects.ts`. Con `featured` aparece como tarjeta; sin `featured`, en la lista «Más proyectos» (usa `thumb` como icono).
 
 Los datos de los textos salen de los repos, READMEs y notas de cada proyecto.
+
+## Actualizar una pieza del sandbox
+
+1. Reconstruí la pieza en `../exploraciones/<carpeta>`.
+2. Corré `node tools/sandbox/sync.mjs` para traerla a `public/sandbox/`.
+3. Si cambió cómo se ve, volvé a sacar la captura y procesala:
+
+```sh
+node tools/sandbox/grabar.mjs ukiyo kora   # ukiyo tarda unos minutos
+node tools/sandbox/lopez.mjs               # los López salen de out/*.mp4: grabalos primero allá con grabar.mjs
+python3 tools/media.py tools/manifest.json --only sandbox/ --force
+```
+
+Para sumar una pieza: agregala a `piezas` en `sync.mjs`, a `src/data/sandbox.ts` y a `videos` en `tools/manifest.json`. La captura también es la imagen que se ve al compartir el link.
 
 ## El campo ASCII
 

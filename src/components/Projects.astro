@@ -31,7 +31,7 @@ const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
   aria-labelledby="proyectos-t"
   data-ambient={JSON.stringify(['Las que tienen ↗ van al sitio', 'Las otras se abren acá mismo'])}
 >
-  <SectionHead n={1} id="proyectos-t" title="Proyectos" />
+  <SectionHead n={2} id="proyectos-t" title="Proyectos" />
   <ul class="grid">
     {
       featured.map((p) => {
@@ -73,7 +73,7 @@ const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
 </section>
 
 <section class="col sec" aria-labelledby="mas-t">
-  <SectionHead n={2} id="mas-t" title="Más proyectos" />
+  <SectionHead n={3} id="mas-t" title="Más proyectos" />
   <ul class="list">
     {
       others.map((p) => (
