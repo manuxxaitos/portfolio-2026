@@ -42,7 +42,7 @@ Requiere Node 22 o superior.
 | `tools/cirilog-mock/` | Servidor con datos inventados para las capturas de CiriLog (nunca usa la base real). |
 | `_versiones/v2-con-paginas/` | La versión anterior, con una página por proyecto, hero, perfil y retrato ASCII. No entra en el build. |
 | `tools/esports/` | Script que bajó las piezas de e-sports desde Behance. |
-| `tools/sandbox/` | `sync.mjs` copia las piezas desde `../exploraciones` y les suma canónica, descripción y vista previa para compartir el link. `grabar.mjs` graba ukiyo y Kora cuadro por cuadro (`reloj.mjs`) y `lopez.mjs` corta los dos López de sus películas; `ciclo.mjs` funde el final con el principio para que el loop no salte. |
+| `tools/sandbox/` | `sync.mjs` copia las piezas desde `../exploraciones` y les suma canónica, descripción, vista previa para compartir el link y un «Ver más en Behance» discreto, vestido de cada pieza, que los `armar-pieza` de `tools/behance` sacan. `grabar.mjs` graba ukiyo y Kora cuadro por cuadro (`reloj.mjs`) y `lopez.mjs` corta los dos López de sus películas; `ciclo.mjs` funde el final con el principio para que el loop no salte. |
 | `_versiones/` | Versión 1 del sitio y componentes descartados, por si hace falta recuperar algo. No entra en el build. |
 | `src/components/CoverStack.astro` + `src/tapas/ring.js` | El anillo 3D de tapas (three.js) del proyecto Tapas de discos: tapas como placas de vidrio y un lente en los costados. Vive solo en la galería (gira solo, se arrastra, al tocar una tapa la trae adelante y la burbuja nombra la que apuntás); en la tarjeta de la página es una foto fija (`tapas/anillo.jpg`), para no sumar otro 3D a la página. |
 
@@ -68,7 +68,7 @@ node tools/sandbox/lopez.mjs               # los López salen de out/*.mp4: grab
 python3 tools/media.py tools/manifest.json --only sandbox/ --force
 ```
 
-Para sumar una pieza: agregala a `piezas` en `sync.mjs`, a `src/data/sandbox.ts` y a `videos` en `tools/manifest.json`. La captura también es la imagen que se ve al compartir el link.
+Para sumar una pieza: agregala a `piezas` en `sync.mjs`, con su `behance`, a `src/data/sandbox.ts` y a `videos` en `tools/manifest.json`. La captura también es la imagen que se ve al compartir el link.
 
 ## El campo ASCII
 
