@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Buddy from '../components/Buddy.astro';
 import SoundToggle from '../components/SoundToggle.astro';
+import Analytics from '@vercel/analytics/astro';
 
 interface Props {
   title?: string;
@@ -12,7 +13,7 @@ interface Props {
 const {
   title = 'Tomás Cardozo — Diseñador',
   description = 'Diseñador en Buenos Aires. Diseño marcas, sitios y productos, los programo y automatizo el resto.',
-  image = '/og.jpg',
+  image = '/og-2026.jpg',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -40,6 +41,9 @@ const ogImage = new URL(image, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="La portada del portfolio: la presentación de Tomás y el Sandbox, con Kaze no tayori" />
     <meta name="twitter:card" content="summary_large_image" />
 
     <script is:inline>
@@ -53,6 +57,7 @@ const ogImage = new URL(image, Astro.site);
     </main>
     <Buddy />
     <SoundToggle />
+    <Analytics />
     <script>
       import { boot } from '../scripts/site';
       boot();
