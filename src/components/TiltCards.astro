@@ -6,6 +6,7 @@
  */
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { langOf, t } from '../i18n';
 
 interface Props {
   cards: { img: ImageMetadata; alt: string }[];
@@ -15,9 +16,10 @@ interface Props {
   label: string;
 }
 const { cards, bg, width, label } = Astro.props;
+const lang = langOf(Astro.url);
 ---
 
-<div class="tilt" data-tilt role="group" aria-label={label} style={`--bg:${bg};--cw:${width}%`} data-say="Movelas: se inclinan">
+<div class="tilt" data-tilt role="group" aria-label={label} style={`--bg:${bg};--cw:${width}%`} data-say={t(lang, 'Movelas: se inclinan')}>
   {
     cards.map((c, i) => (
       <figure class="tilt__card" data-tilt-card style={`--i:${i};--n:${cards.length}`}>

@@ -26,6 +26,7 @@
  * eventos en document (TRIGGERS, abajo).
  */
 import { emit } from './events';
+import { tr } from './lang';
 
 /* ------------------------------------------------------------------ */
 /* ajustes                                                             */
@@ -434,7 +435,7 @@ export function sound() {
   const render = () => {
     if (!btn) return;
     btn.setAttribute('aria-pressed', String(enabled));
-    btn.dataset.say = enabled ? 'Silenciar' : 'Sonidos suaves, si querés';
+    btn.dataset.say = enabled ? tr('Silenciar', 'Mute') : tr('Sonidos suaves, si querés', 'Soft sounds, if you like');
   };
   render();
 
@@ -466,9 +467,9 @@ export function sound() {
     if (enabled) {
       await ensure().resume().catch(() => {});
       play('on');
-      emit('buddy:say', 'Sonido activado');
+      emit('buddy:say', tr('Sonido activado', 'Sound on'));
     } else {
-      emit('buddy:say', 'Sonido apagado');
+      emit('buddy:say', tr('Sonido apagado', 'Sound off'));
       ctx?.suspend();
     }
   });

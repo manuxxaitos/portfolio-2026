@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Buddy from '../components/Buddy.astro';
 import SoundToggle from '../components/SoundToggle.astro';
 import Analytics from '@vercel/analytics/astro';
+import { langOf, pathIn, t } from '../i18n';
 
 interface Props {
   title?: string;
@@ -10,24 +11,29 @@ interface Props {
   image?: string;
 }
 
+const lang = langOf(Astro.url);
 const {
-  title = 'Tomás Cardozo — Diseñador',
-  description = 'Diseñador en Buenos Aires. Diseño marcas, sitios y productos, los programo y automatizo el resto.',
+  title = t(lang, 'Tomás Cardozo — Diseñador'),
+  description = t(lang, 'Diseñador en Buenos Aires. Diseño marcas, sitios y productos, los programo y automatizo el resto.'),
   image = '/og-2026.jpg',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
+const alt = (l: 'es' | 'en') => new URL(pathIn(l, Astro.url.pathname), Astro.site);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="es" href={alt('es')} />
+    <link rel="alternate" hreflang="en" href={alt('en')} />
+    <link rel="alternate" hreflang="x-default" href={alt('es')} />
     <meta name="theme-color" content="#f5f5f3" />
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -36,14 +42,15 @@ const ogImage = new URL(image, Astro.site);
     <link rel="preload" href="/fonts/inter-display-600.woff2" as="font" type="font/woff2" crossorigin />
 
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_AR" />
+    <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'es_AR'} />
+    <meta property="og:locale:alternate" content={lang === 'en' ? 'es_AR' : 'en_US'} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="La portada del portfolio: la presentación de Tomás y el Sandbox, con Kaze no tayori" />
+    <meta property="og:image:alt" content={t(lang, 'La portada del portfolio: la presentación de Tomás y el Sandbox, con Kaze no tayori')} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <script is:inline>
@@ -51,7 +58,7 @@ const ogImage = new URL(image, Astro.site);
     </script>
   </head>
   <body>
-    <a class="skip mono" href="#contenido">Saltar al contenido</a>
+    <a class="skip mono" href="#contenido">{t(lang, 'Saltar al contenido')}</a>
     <main id="contenido">
       <slot />
     </main>

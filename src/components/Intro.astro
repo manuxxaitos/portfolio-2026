@@ -1,6 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import avatar from '../assets/me/avatar.jpg';
+import { langOf, t } from '../i18n';
+
+const lang = langOf(Astro.url);
+const en = lang === 'en';
 
 const email = 'tomascardozo98@gmail.com';
 ---
@@ -25,18 +29,18 @@ const email = 'tomascardozo98@gmail.com';
 
 <section class="intro col" aria-labelledby="intro-title">
   <h1 id="intro-title" class="intro__hi">
-    Soy <strong>Tomás</strong><span class="sr-only">,</span>
-    <span class="intro__face" aria-hidden="true" data-say="¡Hola! Ese soy yo">
+    {en ? 'I’m' : 'Soy'} <strong>Tomás</strong><span class="sr-only">,</span>
+    <span class="intro__face" aria-hidden="true" data-say={t(lang, '¡Hola! Ese soy yo')}>
       <Image src={avatar} alt="" widths={[64, 128]} sizes="34px" loading="eager" fetchpriority="high" />
     </span>
-    <strong>diseñador</strong> en Buenos Aires.
+    {en ? 'a ' : ''}<strong>{en ? 'designer' : 'diseñador'}</strong> {en ? 'in' : 'en'} Buenos Aires.
   </h1>
-  <p>Diseño marcas, sitios y productos.</p>
+  <p>{en ? 'I design brands, websites and products.' : 'Diseño marcas, sitios y productos.'}</p>
   <p>
-    Tomo proyectos freelance. Escribime a <a href={`mailto:${email}`} data-say="¿Charlamos?">{email}</a>, o mirá lo que hago en{' '}
-    <a href="https://github.com/manuxxaitos" rel="me noopener" target="_blank" data-say="Mi código, por acá">GitHub</a>,{' '}
-    <a href="https://www.behance.net/tomasecardozo" rel="me noopener" target="_blank" data-say="Más diseño en Behance">Behance</a>{' '}y{' '}
-    <a href="https://x.com/tomascardozo98" rel="me noopener" target="_blank" data-say="Lo que ando haciendo, en X">X</a>.
+    {en ? 'I take on freelance projects. Write to me at' : 'Tomo proyectos freelance. Escribime a'} <a href={`mailto:${email}`} data-say={t(lang, '¿Charlamos?')}>{email}</a>, {en ? 'or see what I do on' : 'o mirá lo que hago en'}{' '}
+    <a href="https://github.com/manuxxaitos" rel="me noopener" target="_blank" data-say={t(lang, 'Mi código, por acá')}>GitHub</a>,{' '}
+    <a href="https://www.behance.net/tomasecardozo" rel="me noopener" target="_blank" data-say={t(lang, 'Más diseño en Behance')}>Behance</a>{' '}{en ? 'and' : 'y'}{' '}
+    <a href="https://x.com/tomascardozo98" rel="me noopener" target="_blank" data-say={t(lang, 'Lo que ando haciendo, en X')}>X</a>.
   </p>
 </section>
 

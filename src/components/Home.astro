@@ -1,0 +1,21 @@
+---
+/** la portada entera; la usan / (español) y /en/ (inglés), y cada parte toma el idioma de la dirección */
+import Base from '../layouts/Base.astro';
+import Intro from './Intro.astro';
+import Sandbox from './Sandbox.astro';
+import Projects from './Projects.astro';
+import Tools from './Tools.astro';
+import Contact from './Contact.astro';
+import { featured, others } from '../data/projects';
+import { langOf, translate } from '../i18n';
+
+const lang = langOf(Astro.url);
+---
+
+<Base>
+  <Intro />
+  <Sandbox />
+  <Projects featured={translate(lang, featured)} others={translate(lang, others)} />
+  <Tools />
+  <Contact />
+</Base>

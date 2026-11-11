@@ -8,7 +8,9 @@ import { getImage } from 'astro:assets';
 import Arrow from './Arrow.astro';
 import SectionHead from './SectionHead.astro';
 import avatar from '../assets/me/avatar.jpg';
+import { langOf, pathIn, t } from '../i18n';
 
+const lang = langOf(Astro.url);
 const email = 'tomascardozo98@gmail.com';
 const year = new Date().getFullYear();
 const face = await getImage({ src: avatar, width: 56, format: 'webp', quality: 80 });
@@ -19,11 +21,15 @@ const links: [string, string, string][] = [
   ['X', '@tomascardozo98', 'https://x.com/tomascardozo98'],
 ];
 // la charla con la que arranca
-const intro = ['¿Qué construimos?', 'Contame la idea, el producto o el proceso que querés sacarte de encima.'];
+const intro = ['¿Qué construimos?', 'Contame la idea, el producto o el proceso que querés sacarte de encima.'].map((s) => t(lang, s));
+const langs = [
+  { code: 'es', name: 'Español' },
+  { code: 'en', name: 'English' },
+] as const;
 ---
 
 <section id="contacto" class="col sec" aria-labelledby="contacto-t">
-  <SectionHead n={5} id="contacto-t" title="Contacto" />
+  <SectionHead n={5} id="contacto-t" title={t(lang, 'Contacto')} />
   <div class="stage">
     <canvas data-plotter="field" aria-hidden="true"></canvas>
     <div class="chat glass" data-reveal data-buddy-off data-chat>
@@ -49,14 +55,14 @@ const intro = ['¿Qué construimos?', 'Contame la idea, el producto o el proceso
           }
         </ol>
         <form class="compose" data-compose={email} action={`mailto:${email}`} method="post" enctype="text/plain">
-          <label class="sr-only" for="compose-msg">Tu mensaje</label>
-          <textarea id="compose-msg" name="mensaje" rows="1" placeholder="Escribí tu mensaje…" autocomplete="off"></textarea>
-          <button class="aqua" type="submit" data-compose-send>Enviar</button>
+          <label class="sr-only" for="compose-msg">{t(lang, 'Tu mensaje')}</label>
+          <textarea id="compose-msg" name="mensaje" rows="1" placeholder={t(lang, 'Escribí tu mensaje…')} autocomplete="off"></textarea>
+          <button class="aqua" type="submit" data-compose-send>{t(lang, 'Enviar')}</button>
         </form>
       </div>
       <footer class="chat__foot">
         <a href={`mailto:${email}`}>{email}</a>
-        <button class="aqua aqua--graphite aqua--sm" type="button" data-copy={email}><span data-copy-label>Copiar</span></button>
+        <button class="aqua aqua--graphite aqua--sm" type="button" data-copy={email}><span data-copy-label>{t(lang, 'Copiar')}</span></button>
       </footer>
     </div>
   </div>
@@ -82,10 +88,29 @@ const intro = ['¿Qué construimos?', 'Contame la idea, el producto o el proceso
     }
   </dl>
   <p class="foot__colophon">
-    © {year} Tomás Cardozo. Tipografía Inter, de Rasmus Andersson. Hecho a mano en Astro, con un campo ASCII propio en WebGL.
-    <span data-weight hidden> Esta visita pesó <span data-weight-kb></span>.</span>
+    © {year} Tomás Cardozo. {t(lang, 'Tipografía Inter, de Rasmus Andersson. Hecho a mano en Astro, con un campo ASCII propio en WebGL.')}
+    <span data-weight hidden> {t(lang, 'Esta visita pesó')} <span data-weight-kb></span>.</span>
   </p>
-  <a class="foot__top" href="#contenido">Arriba <Arrow dir="up" /></a>
+  <nav class="foot__lang" aria-label={t(lang, 'Idioma')}>
+    {
+      langs.map((l, i) => (
+        <>
+          {i > 0 && <span aria-hidden="true">/</span>}
+          <a
+            href={pathIn(l.code, Astro.url.pathname)}
+            hreflang={l.code}
+            lang={l.code}
+            aria-label={l.name}
+            aria-current={l.code === lang ? 'page' : undefined}
+            data-say={l.code === lang ? undefined : l.code === 'en' ? 'Read it in English' : 'Leelo en español'}
+          >
+            {l.code.toUpperCase()}
+          </a>
+        </>
+      ))
+    }
+  </nav>
+  <a class="foot__top" href="#contenido">{t(lang, 'Arriba')} <Arrow dir="up" /></a>
 </footer>
 
 <style>
@@ -272,8 +297,29 @@ const intro = ['¿Qué construimos?', 'Contame la idea, el producto o el proceso
     font-size: 0.8125rem;
     color: var(--ink-3);
   }
+  .foot__lang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 0.8125rem;
+    color: var(--ink-3);
+  }
+  .foot__lang a {
+    color: var(--ink-3);
+    text-decoration: none;
+  }
+  .foot__lang a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+  .foot__lang a[aria-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
   .foot__top {
-    display: inline-flex;
+    display: flex;
+    width: fit-content;
     align-items: center;
     gap: 6px;
     margin-top: 14px;

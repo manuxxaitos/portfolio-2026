@@ -6,6 +6,7 @@
  */
 import { Picture } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { langOf, t } from '../i18n';
 
 interface Props {
   module: 'kench' | 'aish' | 'supplycon';
@@ -16,6 +17,7 @@ interface Props {
   say: string;
 }
 const { module, poster, label, ways, say } = Astro.props;
+const lang = langOf(Astro.url);
 ---
 
 <div class="toy" data-toy data-module={module}>
@@ -49,7 +51,7 @@ const { module, poster, label, ways, say } = Astro.props;
       ))
     }
   </div>)}
-  <p class="toy__hint" aria-hidden="true">Arrastrá para girar · un toque y rebota</p>
+  <p class="toy__hint" aria-hidden="true">{t(lang, 'Arrastrá para girar · un toque y rebota')}</p>
 </div>
 
 <script>

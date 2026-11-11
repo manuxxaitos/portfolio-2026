@@ -6,17 +6,21 @@
 import Arrow from './Arrow.astro';
 import Media from './Media.astro';
 import SectionHead from './SectionHead.astro';
-import { sandbox } from '../data/sandbox';
+import { sandbox as all } from '../data/sandbox';
+import { langOf, t, translate } from '../i18n';
+
+const lang = langOf(Astro.url);
+const sandbox = translate(lang, all);
 ---
 
 <section
   id="sandbox"
   class="col sec"
   aria-labelledby="sandbox-t"
-  data-ambient={JSON.stringify(['Están vivas: entrá y tocá', 'Esto lo hago por curiosidad'])}
+  data-ambient={JSON.stringify([t(lang, 'Están vivas: entrá y tocá'), t(lang, 'Esto lo hago por curiosidad')])}
 >
   <SectionHead n={1} id="sandbox-t" title="Sandbox" />
-  <p class="lead">Lo que hago por curiosidad, sin cliente. Cada pieza está viva y tiene su propio link.</p>
+  <p class="lead">{t(lang, 'Lo que hago por curiosidad, sin cliente. Cada pieza está viva y tiene su propio link.')}</p>
   <ul class="grid">
     {
       sandbox.map((s) => (

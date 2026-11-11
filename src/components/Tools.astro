@@ -1,16 +1,19 @@
 ---
 import SectionHead from './SectionHead.astro';
+import { langOf, t } from '../i18n';
 
-const tools: [string, string, string?][] = [
+const lang = langOf(Astro.url);
+
+const tools = ([
   ['Diseño', 'Figma, sistemas de diseño, identidad, editorial'],
   ['Producto y web', 'HTML, CSS, JavaScript y TypeScript, Three.js, GSAP, Astro, React, FastAPI, SQLite'],
   ['IA y automatización', 'Claude Code, Codex, API de Anthropic, Whisper, Python, ffmpeg, OpenCV, Playwright', 'Uso la IA por iniciativa propia: para explorar más ideas, prototipar rápido y automatizar lo repetitivo, sin resignar el detalle.'],
   ['Motion', 'After Effects, Premiere y video generado en código'],
-];
+] as [string, string, string?][]).map((row) => row.map((s) => s && t(lang, s)) as [string, string, string?]);
 ---
 
 <section class="col sec" aria-labelledby="herramientas-t">
-  <SectionHead n={4} id="herramientas-t" title="Con qué trabajo" />
+  <SectionHead n={4} id="herramientas-t" title={t(lang, 'Con qué trabajo')} />
   <dl class="tools" data-reveal>
     {
       tools.map(([k, v, note]) => (

@@ -5,6 +5,7 @@ import { buddy } from './buddy';
 import { intro } from './intro';
 import { emit } from './events';
 import { sound } from './sound';
+import { tr } from './lang';
 
 type RGB = [number, number, number];
 const PAPER: RGB = [245, 245, 243];
@@ -117,7 +118,7 @@ function copyButtons() {
     btn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(btn.dataset.copy!);
-        if (label) label.textContent = 'Copiado';
+        if (label) label.textContent = tr('Copiado', 'Copied');
         emit('copy:ok');
       } catch {
         location.href = `mailto:${btn.dataset.copy}`;

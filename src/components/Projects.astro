@@ -5,11 +5,13 @@ import Arrow from './Arrow.astro';
 import SectionHead from './SectionHead.astro';
 import Window from './Window.astro';
 import { opensWindow, type Media as M, type Project } from '../data/types';
+import { langOf, t } from '../i18n';
 
 interface Props {
   featured: Project[];
   others: Project[];
 }
+const lang = langOf(Astro.url);
 const { featured, others } = Astro.props;
 const ratioOf = (m: M) => {
   if (m.kind === 'image') return m.img.width / m.img.height;
@@ -19,8 +21,8 @@ const ratioOf = (m: M) => {
 /* sitios: directo al sitio; el resto, a su ventana. data-say es lo que dice la burbuja del cursor */
 const link = (p: Project, list = false) =>
   opensWindow(p)
-    ? { href: `#${p.slug}`, 'data-open': p.slug, 'data-say': p.hover ?? (list ? 'Mirá este proyecto' : 'Abrimos la galería') }
-    : { href: p.url!.href, target: '_blank', rel: 'noopener', 'data-say': p.hover ?? 'Te llevo al sitio' };
+    ? { href: `#${p.slug}`, 'data-open': p.slug, 'data-say': p.hover ?? t(lang, list ? 'Mirá este proyecto' : 'Abrimos la galería') }
+    : { href: p.url!.href, target: '_blank', rel: 'noopener', 'data-say': p.hover ?? t(lang, 'Te llevo al sitio') };
 const windows = [...featured, ...others].filter(opensWindow);
 const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
 ---
@@ -29,9 +31,9 @@ const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
   id="proyectos"
   class="col sec"
   aria-labelledby="proyectos-t"
-  data-ambient={JSON.stringify(['Las que tienen ↗ van al sitio', 'Las otras se abren acá mismo'])}
+  data-ambient={JSON.stringify([t(lang, 'Las que tienen ↗ van al sitio'), t(lang, 'Las otras se abren acá mismo')])}
 >
-  <SectionHead n={2} id="proyectos-t" title="Proyectos" />
+  <SectionHead n={2} id="proyectos-t" title={t(lang, 'Proyectos')} />
   <ul class="grid">
     {
       featured.map((p) => {
@@ -47,11 +49,11 @@ const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
                     <>
                       <i class="mini" />
                       <i class="mini" />
-                      <i class="mini" /> Abrir
+                      <i class="mini" /> {t(lang, 'Abrir')}
                     </>
                   ) : (
                     <>
-                      Ir al sitio <Arrow dir="up-right" />
+                      {t(lang, 'Ir al sitio')} <Arrow dir="up-right" />
                     </>
                   )}
                 </span>
@@ -73,7 +75,7 @@ const wide = (p: Project) => p.wide ?? Boolean(p.groups && !p.gallery);
 </section>
 
 <section class="col sec" aria-labelledby="mas-t">
-  <SectionHead n={3} id="mas-t" title="Más proyectos" />
+  <SectionHead n={3} id="mas-t" title={t(lang, 'Más proyectos')} />
   <ul class="list">
     {
       others.map((p) => (

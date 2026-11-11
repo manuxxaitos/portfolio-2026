@@ -3,15 +3,18 @@
  * Botón para activar o silenciar los sonidos de la página (scripts/sound.ts). Viene prendido y
  * recuerda si lo apagaste. La lucecita verde dice si está prendido.
  */
+import { langOf, t } from '../i18n';
+
+const lang = langOf(Astro.url);
 ---
 
-<button class="snd aqua aqua--graphite aqua--sm" type="button" data-sound-toggle aria-pressed="true" data-say="Silenciar">
+<button class="snd aqua aqua--graphite aqua--sm" type="button" data-sound-toggle aria-pressed="true" data-say={t(lang, 'Silenciar')}>
   <svg class="snd__icon" viewBox="0 0 16 16" aria-hidden="true">
     <path class="snd__body" d="M2.4 6.1h2.3L8 3.3v9.4l-3.3-2.8H2.4z"></path>
     <path class="snd__wave" d="M10.3 5.7a3.3 3.3 0 0 1 0 4.6M12.1 4a5.7 5.7 0 0 1 0 8"></path>
     <path class="snd__off" d="M10.6 6.2l3.4 3.6M14 6.2l-3.4 3.6"></path>
   </svg>
-  <span class="snd__label">Sonido</span>
+  <span class="snd__label">{t(lang, 'Sonido')}</span>
   <i class="snd__led" aria-hidden="true"></i>
 </button>
 

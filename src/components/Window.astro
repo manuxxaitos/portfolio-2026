@@ -10,12 +10,14 @@ import Media from './Media.astro';
 import Arrow from './Arrow.astro';
 import Soportes from './Soportes.astro';
 import type { Item, Project } from '../data/types';
+import { langOf, t } from '../i18n';
 
 interface Props {
   p: Project;
   prev: Project;
   next: Project;
 }
+const lang = langOf(Astro.url);
 const { p, prev, next } = Astro.props;
 const id = p.slug;
 const sizesFor = (span = 12) => `(min-width: 1100px) ${Math.round((span / 12) * 1100)}px, (min-width: 820px) ${Math.round((span / 12) * 90)}vw, 100vw`;
@@ -33,13 +35,13 @@ const captionOf = (m: Item) => {
   <div class="win__frame glass" data-win-frame>
     <header class="win__bar titlebar">
       <div class="lights">
-        <button class="light light--close" type="button" data-win-close aria-label="Cerrar">
+        <button class="light light--close" type="button" data-win-close aria-label={t(lang, 'Cerrar')}>
           <svg viewBox="0 0 8 8" aria-hidden="true"><path d="M1.5 1.5l5 5M6.5 1.5l-5 5"></path></svg>
         </button>
-        <button class="light light--min" type="button" data-win-close aria-label="Minimizar">
+        <button class="light light--min" type="button" data-win-close aria-label={t(lang, 'Minimizar')}>
           <svg viewBox="0 0 8 8" aria-hidden="true"><path d="M1.2 4h5.6"></path></svg>
         </button>
-        <button class="light light--zoom" type="button" data-win-zoom aria-label="Agrandar">
+        <button class="light light--zoom" type="button" data-win-zoom aria-label={t(lang, 'Agrandar')}>
           <svg viewBox="0 0 8 8" aria-hidden="true"><path d="M4 1.2v5.6M1.2 4h5.6"></path></svg>
         </button>
       </div>
@@ -47,13 +49,13 @@ const captionOf = (m: Item) => {
         {p.title} <span class="win__what">— {p.what} · {p.year}</span>
       </h2>
       <div class="win__tools">
-        <div class="seg" role="group" aria-label="Otros proyectos">
+        <div class="seg" role="group" aria-label={t(lang, 'Otros proyectos')}>
           <button
             class="aqua aqua--graphite aqua--sm"
             type="button"
             data-win-go={prev.slug}
-            aria-label={`Anterior: ${prev.title}`}
-            data-say={`Anterior: ${prev.title}`}
+            aria-label={`${t(lang, 'Anterior')}: ${prev.title}`}
+            data-say={`${t(lang, 'Anterior')}: ${prev.title}`}
           >
             <Arrow dir="left" />
           </button>
@@ -61,8 +63,8 @@ const captionOf = (m: Item) => {
             class="aqua aqua--graphite aqua--sm"
             type="button"
             data-win-go={next.slug}
-            aria-label={`Siguiente: ${next.title}`}
-            data-say={`Siguiente: ${next.title}`}
+            aria-label={`${t(lang, 'Siguiente')}: ${next.title}`}
+            data-say={`${t(lang, 'Siguiente')}: ${next.title}`}
           >
             <Arrow />
           </button>
@@ -70,7 +72,7 @@ const captionOf = (m: Item) => {
         {
           p.url && (
             <a class="aqua aqua--sm aqua--pulse" href={p.url.href} target="_blank" rel="noopener">
-              Ver sitio <Arrow dir="up-right" />
+              {t(lang, 'Ver sitio')} <Arrow dir="up-right" />
             </a>
           )
         }

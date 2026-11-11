@@ -1,5 +1,6 @@
 import type Lenis from 'lenis';
 import { emit } from './events';
+import { tr } from './lang';
 
 /* Ventanas de proyecto (galerías sobre la página) y el chat de contacto.
    Avisan win:open al abrir (con cómo: genie, switch o instant), win:closing al
@@ -176,7 +177,7 @@ export function compose() {
     p.className = 'bubble';
     const sr = document.createElement('span');
     sr.className = 'sr-only';
-    sr.textContent = who === 'in' ? 'Tomás: ' : 'Vos: ';
+    sr.textContent = who === 'in' ? 'Tomás: ' : tr('Vos: ', 'You: ');
     p.append(sr, text);
     li.append(p);
     return li;
@@ -273,7 +274,7 @@ export function compose() {
   };
   const ask = (mail: boolean) => {
     step = mail ? 'mail' : 'msg';
-    ta.placeholder = placeholder = mail ? 'tu@mail.com' : 'Escribí tu mensaje…';
+    ta.placeholder = placeholder = mail ? tr('tu@mail.com', 'you@email.com') : tr('Escribí tu mensaje…', 'Write your message…');
     ta.inputMode = mail ? 'email' : 'text';
     ta.autocomplete = mail ? 'email' : 'off';
   };
@@ -283,7 +284,7 @@ export function compose() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          _subject: 'Mensaje desde tomascardozo.com',
+          _subject: tr('Mensaje desde tomascardozo.com', 'Mensaje desde tomascardozo.com (en inglés)'),
           _template: 'box',
           _captcha: 'false',
           _replyto: mail,
@@ -315,10 +316,10 @@ export function compose() {
     e.preventDefault();
     const text = ta.value.trim();
     // vacío: la caja se sacude, se marca y lo dice; suena un toque grave
-    if (!text) return fail(step === 'mail' ? 'Escribí tu mail' : 'Escribí tu mensaje primero');
+    if (!text) return fail(step === 'mail' ? tr('Escribí tu mail', 'Write your email') : tr('Escribí tu mensaje primero', 'Write your message first'));
     if (step === 'mail' && !isMail(text)) {
       ta.value = text;
-      return fail('Ese mail no parece completo');
+      return fail(tr('Ese mail no parece completo', 'That email doesn’t look complete'));
     }
     clearTimeout(errTimer);
     form.classList.remove('is-error');
@@ -334,7 +335,7 @@ export function compose() {
     if (step === 'msg') {
       message = text;
       ask(true);
-      await say('¡Gracias! ¿A qué mail te contesto?');
+      await say(tr('¡Gracias! ¿A qué mail te contesto?', 'Thanks! What email should I reply to?'));
       return;
     }
     // el mail: se envía mientras «escribe»
@@ -345,11 +346,11 @@ export function compose() {
     dots.remove();
     if (ok) {
       // llegó de verdad: las dos notas del éxito en lugar del pop de respuesta
-      await say('Listo, me llegó. Te escribo pronto.', 10, 'chat:sent');
+      await say(tr('Listo, me llegó. Te escribo pronto.', 'Done, got it. I’ll write back soon.'), 10, 'chat:sent');
       return;
     }
-    await say('No pude enviarlo desde acá, así que te abro el correo con tu mensaje.', 10);
+    await say(tr('No pude enviarlo desde acá, así que te abro el correo con tu mensaje.', 'I couldn’t send it from here, so I’m opening your email app with your message.'), 10);
     await wait(700);
-    location.href = `mailto:${email}?subject=${encodeURIComponent('Hola, Tomás')}&body=${encodeURIComponent(message)}`;
+    location.href = `mailto:${email}?subject=${encodeURIComponent(tr('Hola, Tomás', 'Hi Tomás'))}&body=${encodeURIComponent(message)}`;
   });
 }

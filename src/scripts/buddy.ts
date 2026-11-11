@@ -19,6 +19,7 @@
  * - Otros pueden hacerla hablar con buddy:say (sin sonido).
  */
 import { emit } from './events';
+import { EN, tr } from './lang';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const H = 28;
@@ -40,7 +41,7 @@ const PAGE_BUDGET = 3;
 
 const greeting = () => {
   const h = new Date().getHours();
-  return h >= 5 && h < 12 ? 'Buen día' : h >= 12 && h < 20 ? 'Buenas tardes' : 'Buenas noches';
+  return h >= 5 && h < 12 ? tr('Buen día', 'Good morning') : h >= 12 && h < 20 ? tr('Buenas tardes', 'Good afternoon') : tr('Buenas noches', 'Good evening');
 };
 const readFor = (s: string) => Math.min(Math.max(1600 + s.length * 45, 2200), 4200);
 const list = (raw?: string) => {
@@ -136,9 +137,9 @@ export function buddy() {
   // los nombres de piezas («título · artista») van sin carita
   const FACES = [':)', '.✦ ݁˖', '<𝟑', ':D', '˖ ࣪⊹'];
   const voice = (s: string) => {
-    const t = s.toLocaleLowerCase('es');
+    const t = s.toLocaleLowerCase(EN ? 'en' : 'es');
     // la del contacto, siempre con corazón
-    if (t === '¿charlamos?') return `${t} <𝟑`;
+    if (t === '¿charlamos?' || t === 'let’s talk?') return `${t} <𝟑`;
     if (t.includes(' · ') || t.length > 46) return t;
     let h = 5381;
     for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
