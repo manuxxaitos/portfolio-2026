@@ -60,4 +60,13 @@ export const sandbox: Exploration[] = [
     wide: true,
     capture: capture('lopez-itapiru', 'La caballería y los batallones del Ejército Aliado sobre la arena de Itapirú', '2 / 1'),
   },
+  {
+    slug: 'pro-mouse',
+    title: 'Pro Mouse',
+    what: 'Objeto 3D',
+    line: 'El mouse transparente de Apple del 2000, en tamaño real. Giralo, hacé clic o usalo con tu mouse.',
+    hover: 'Entrá y hacé clic: suena',
+    wide: true,
+    capture: capture('pro-mouse', 'El Pro Mouse negro girando sobre blanco, con su carcasa de acrílico transparente y el cable'),
+  },
 ];

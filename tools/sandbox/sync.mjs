@@ -2,7 +2,7 @@
 // acá queda en public/sandbox/<slug>/, con su propio link. Le agrega a la copia lo que hace falta para compartir ese link
 // (canónica, descripción y vista previa) y el link a su proyecto de Behance, sin tocar el original. El link va entre las
 // marcas <!-- behance --> para que los armar-pieza de tools/behance lo saquen. Correr después de reconstruir una pieza allá:
-//   node tools/sandbox/sync.mjs                 todas
+//   node tools/sandbox/sync.mjs                 todas (las que no tienen `behance` van sin el link)
 //   node tools/sandbox/sync.mjs lopez-vivo      solo esa, para no traer una pieza que sigue a medio hacer
 import fs from 'node:fs';
 import path from 'node:path';
@@ -70,6 +70,12 @@ const piezas = [
     desc: 'Un óleo vivo según Cándido López: la llegada del Ejército Aliado a Itapirú, con sus batallones, los barcos, el río, el sonido y la noche de la marcha.',
     behance: {...obra, url: 'https://www.behance.net/gallery/258158255/Llegada-a-Itapiru-Oleo-vivo'},
   },
+  {
+    // todavía sin proyecto en Behance: va sin el link
+    slug: 'pro-mouse',
+    src: 'pro-mouse/pro-mouse.html',
+    desc: 'El Apple Pro Mouse del 2000 en 3D, en tamaño real: el acrílico desvía la luz, toda la carcasa es el botón y se puede usar con tu propio mouse.',
+  },
 ];
 const cssBehance = `
   #behance { color: inherit; text-decoration: none; white-space: nowrap; transition: opacity .4s cubic-bezier(.16, 1, .3, 1), color .3s cubic-bezier(.16, 1, .3, 1); }
@@ -108,7 +114,8 @@ for (const {slug, src, desc, behance} of piezas.filter((p) => !pedidas.length ||
     `<meta property="og:image" content="${site}/media/sandbox/${slug}.jpg">`,
     `<meta name="twitter:card" content="summary_large_image">`,
   ].filter(Boolean).join('\n');
-  html = conBehance(html.replace('</title>', `</title>\n${head}`), behance);
+  html = html.replace('</title>', `</title>\n${head}`);
+  if (behance) html = conBehance(html, behance);
   const out = path.join(root, 'public/sandbox', slug);
   fs.mkdirSync(out, {recursive: true});
   fs.writeFileSync(path.join(out, 'index.html'), html);

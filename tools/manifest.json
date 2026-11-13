@@ -509,6 +509,15 @@
    "crf": 23,
    "crf_av1": 34,
    "poster_at": 2
+  },
+  {
+   "src": "tools/sandbox/src/pro-mouse.mp4",
+   "out": "sandbox/pro-mouse",
+   "fps": 30,
+   "w": 1280,
+   "crf": 24,
+   "crf_av1": 38,
+   "poster_at": 0.4
   }
  ]
 }

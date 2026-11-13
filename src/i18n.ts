@@ -111,6 +111,12 @@ const EN: Record<string, string> = {
   'Todo se mueve: entrá': 'Everything moves: go in',
   'La caballería y los batallones del Ejército Aliado sobre la arena de Itapirú':
     'The cavalry and battalions of the Allied Army on the sands of Itapirú',
+  'Objeto 3D': '3D object',
+  'El mouse transparente de Apple del 2000, en tamaño real. Giralo, hacé clic o usalo con tu mouse.':
+    'Apple’s clear mouse from 2000, at real size. Turn it, click it, or use it with your own mouse.',
+  'Entrá y hacé clic: suena': 'Go in and click: it sounds',
+  'El Pro Mouse negro girando sobre blanco, con su carcasa de acrílico transparente y el cable':
+    'The black Pro Mouse turning on white, with its clear acrylic shell and its cable',
 
   // ---------- proyectos: comunes ----------
   'Brochure web': 'Web brochure',
